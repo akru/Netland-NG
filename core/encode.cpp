@@ -1,3 +1,8 @@
+/*
+  Thanks Assaron, this code really work,
+  but it's really fuck your mind too.
+ */
+
 #include "encode.h"
 
 #include <QString>

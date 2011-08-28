@@ -13,26 +13,29 @@ public:
     ConnectorOld(QObject *parent = 0);
 
 signals:
-    void readStringReady(QString str);
+    void readStringReady(QByteArray recv);
     void authStringReady(QString authStr);
     void authRequestRecv(QString req);
-    void baseInitReady(QString baseInitStr);
 
 private:
     void connectAll();
+    QMap<int, BoardChannel *> parseBoardChannels(QStringList message);
+    QMap<int, BoardMessage *> parseBoardMessages(QStringList message);
 
 private slots:
     void readString();
-    void stringParser(QString recvStr);
+    void stringParser(QByteArray recv);
     void authStringProcessing(QString req);
     void sendString(QString str);
     void isConnected();
 
+    void boardUpdateMessages();
+
 
 private:
-    QString hostname;
-    QString nick;
     QTextCodec *codec;
+    int lastTimeId;
+    QByteArray recvBuffer;
 
     static const char* version;
     static const int hash = 0x02d45b64;

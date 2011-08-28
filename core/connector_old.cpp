@@ -10,9 +10,8 @@ const char * ConnectorOld::version = "v8.6";
 
 ConnectorOld::ConnectorOld(QObject *parent)
     : Connector(parent),
-      hostname(QHostInfo::localHostName()),
-      nick("akru"),
-      codec(QTextCodec::codecForName("cp-1251"))
+      codec(QTextCodec::codecForName("cp-1251")), // All messages from this server encoded in WINDOWS-CP1251
+      lastTimeId(0)
 {
     connectAll();
 }
@@ -21,12 +20,14 @@ void ConnectorOld::connectAll()
 {
     connect(this, SIGNAL(readyRead()),
             this, SLOT(readString()));
-    connect(this, SIGNAL(readStringReady(QString)),
-            this, SLOT(stringParser(QString)));
+    connect(this, SIGNAL(readStringReady(QByteArray)),
+            this, SLOT(stringParser(QByteArray)));
+
     connect(this, SIGNAL(authRequestRecv(QString)),
             this, SLOT(authStringProcessing(QString)));
     connect(this, SIGNAL(authStringReady(QString)),
             this, SLOT(sendString(QString)));
+
     connect(this, SIGNAL(connected()),
             this, SLOT(isConnected()));
 }
@@ -38,7 +39,16 @@ void ConnectorOld::isConnected()
 
 void ConnectorOld::readString()
 {
-    emit readStringReady(codec->toUnicode(readAll()));
+    recvBuffer += readAll();
+    if (recvBuffer.split('\n').count() == 1)    // Verify for not full message
+        return;
+    QList<QByteArray> recvStrings = recvBuffer.split('\n'); // Splitting messages
+    recvBuffer = recvStrings.last();                        // Save not full on buffer
+    recvStrings.pop_back();                                 // Remove not full from list
+    QList<QByteArray>::const_iterator it;
+    for (it = recvStrings.constBegin();
+         it != recvStrings.constEnd(); ++it)
+        emit readStringReady(*it);
 }
 
 void ConnectorOld::sendString(QString str)
@@ -46,37 +56,116 @@ void ConnectorOld::sendString(QString str)
     write(str.toAscii());
 }
 
-void ConnectorOld::stringParser(QString recvStr)
+void ConnectorOld::stringParser(QByteArray recv)
 {
+    QString recvStr = codec->toUnicode(recv);
+    QChar category = recvStr[0];                        // First symbol of string
+    QStringList message = recvStr.mid(1).split("\t");   // Remove first symbol & splitting
     QString cmd;
-    QStringList recvStringList = recvStr.split("\n");
-    recvStringList.pop_back();
-
-    QStringList::const_iterator i;
-    for (i = recvStringList.constBegin(); i != recvStringList.constEnd(); ++i)
+    switch (category.toAscii())
     {
-        switch ((*i)[0].toAscii())
+    case 'R':       // Authentification request
+        emit authRequestRecv(message.at(0));
+        qDebug() << "Auth_r :: " << message;
+        break;
+    case 'b':       // Information
+        emit infoMessage(message.at(0));
+        qDebug() << "Inform :: " << message;
+        break;
+    case 'd':       // Board
+        cmd = message.at(0);
+        if (cmd == "channels")  // Receved channel list
         {
-        case 'R':
-            emit authRequestRecv((*i).mid(1));
-            break;
-        case 'b':
-            qDebug() << "Inf :: " << (*i).mid(1);
-            emit infoMessage((*i).mid(1));
-            break;
-        case 'c':
-            cmd = (*i).split('\t')[0];
-            if (cmd == QString("cip"))
-                emit ipConform();
-            if (cmd == QString("cuserlist"))
-                emit userListRecv();
-            qDebug() << *i;
-            break;
-         default:
-            qDebug() << *i;
+            message.pop_front();    // Remove command from message
+            emit boardChannelsRecv(parseBoardChannels(message));
         }
+        else
+        {
+            if (cmd == "new")
+            {
+                emit boardNewMessages();
+            }
+            else
+            {
+                if (cmd == "skins")
+                {
+                    emit boardNewMessages();
+                }
+                else
+                    emit boardMessagesRecv(parseBoardMessages(message));
+            }
+        }
+        //qDebug() << "DBoard :: " << message;
+        break;
+    case 'c':       // Chat
+        qDebug() << "Chat   :: " << message;
+        break;
+     default:       // Uncategorsed
+        qDebug() << "Unctg  :: " << recvStr;
     }
+}
 
+QMap<int, BoardChannel *> ConnectorOld::parseBoardChannels(QStringList message)
+{
+    QMap<int, BoardChannel *> channels;
+    /*
+      Thanks Assaron
+
+CHANNEL_PROPERTIES = (("id", int_decoder),
+                      ("name", unicode_decoder),
+                      ("description", unicode_decoder))
+      */
+
+    for (int i = 0; i < message.count() - 1; i = i + 3)
+    {
+        BoardChannel *ch = new BoardChannel(
+                    message.at(i).toInt(),
+                    message.at(i+1).mid(1),
+                    message.at(i+2));
+        channels.insert(ch->id(), ch);
+    }
+    return channels;
+}
+
+QMap<int, BoardMessage *> ConnectorOld::parseBoardMessages(QStringList message)
+{
+    QMap<int, BoardMessage *> messages;
+    /*
+      Thanks Assaron
+
+MESSAGE_PROPERTIES = (
+    ("id", int_decoder), ("unknown1", int_decoder), ("parent_id", int_decoder),
+    ("delete_", int_decoder), ("IP", str_decoder), ("hostname", unicode_decoder),
+    ("nick", unicode_decoder), ("body", unicode_decoder),
+    ("edit_time", time_decoder), ("channel_id", int_decoder),
+    ("unknown2", int_decoder), ("mac", str_decoder), ("zero1", int_decoder),
+    ("zero2", int_decoder), ("zero3", int_decoder), ("zero4", int_decoder),
+    ("time_id", int_decoder), ("deleted", int_decoder), ("post_time", time_decoder)
+    )
+      */
+    for (int i = 0; i < message.count() - 18; i = i + 19)
+    {
+        QString body = message.at(i+7);
+        body.replace(0x01, '\n');
+        BoardMessage *msg = new BoardMessage(
+                    message.at(i).toInt(),
+                    message.at(i+2).toInt(),
+                    message.at(i+9).toInt(),
+                    message.at(i+16).toInt(),
+                    message.at(3).toInt(),
+                    message.at(17).toInt(),
+                    message.at(i+4),
+                    message.at(i+11),
+                    message.at(i+5),
+                    message.at(i+6),
+                    body,
+                    message.at(18),
+                    message.at(8));
+        messages.insert(msg->id(), msg);
+        if (msg->timeId() > lastTimeId)
+            lastTimeId = msg->timeId();
+    }
+    return messages;
 }
 
 void ConnectorOld::authStringProcessing(QString req)
@@ -84,7 +173,8 @@ void ConnectorOld::authStringProcessing(QString req)
     Encode enc(req, hash);
     QString authCode = enc.getReply();
     QString authString = QString(version) + "\t" +
-                         authCode + "\tCPU_INFO\tOS_INFO\t" + hostname + "\n";
+            authCode + "\tCPU_INFO\tOS_INFO\t" +
+            QHostInfo::localHostName() + "\n";
     emit authStringReady(authString);
 }
 
@@ -96,3 +186,12 @@ void ConnectorOld::authStringProcessing(QString req)
 //    QString baseInitString = nickSetString + userListString;
 //    emit baseInitReady(baseInitString);
 //}
+
+void ConnectorOld::boardUpdateMessages()
+{
+    qDebug() << "CONNECTOR :: Do update messages";
+
+    QString req("Dlast\t%1\t\n");
+    req.arg(QString::number(lastTimeId));
+    sendString(req);
+}
