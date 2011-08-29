@@ -48,7 +48,9 @@ void ConnectorOld::readString()
     QList<QByteArray>::const_iterator it;
     for (it = recvStrings.constBegin();
          it != recvStrings.constEnd(); ++it)
+    {
         emit readStringReady(*it);
+    }
 }
 
 void ConnectorOld::sendString(QString str)
@@ -77,7 +79,7 @@ void ConnectorOld::stringParser(QByteArray recv)
         if (cmd == "channels")  // Receved channel list
         {
             message.pop_front();    // Remove command from message
-            emit boardChannelsRecv(parseBoardChannels(message));
+            emit boardChannelsRecv(parseBoardChannels(message.join("\t")));
         }
         else
         {
@@ -89,10 +91,9 @@ void ConnectorOld::stringParser(QByteArray recv)
             {
                 if (cmd == "skins")
                 {
-                    emit boardNewMessages();
                 }
                 else
-                    emit boardMessagesRecv(parseBoardMessages(message));
+                    emit boardMessagesRecv(parseBoardMessages(message.join("\t")));
             }
         }
         //qDebug() << "DBoard :: " << message;
@@ -105,7 +106,7 @@ void ConnectorOld::stringParser(QByteArray recv)
     }
 }
 
-QMap<int, BoardChannel *> ConnectorOld::parseBoardChannels(QStringList message)
+QMap<int, BoardChannel *> ConnectorOld::parseBoardChannels(QString recvMessage)
 {
     QMap<int, BoardChannel *> channels;
     /*
@@ -115,19 +116,22 @@ CHANNEL_PROPERTIES = (("id", int_decoder),
                       ("name", unicode_decoder),
                       ("description", unicode_decoder))
       */
-
-    for (int i = 0; i < message.count() - 1; i = i + 3)
+    QStringList channelsList = recvMessage.split('\r');
+    channelsList.pop_back(); // Remove empty string
+    for (QStringList::const_iterator it = channelsList.constBegin();
+         it != channelsList.constEnd(); ++it)
     {
+        QStringList channel = (*it).split('\t');
         BoardChannel *ch = new BoardChannel(
-                    message.at(i).toInt(),
-                    message.at(i+1).mid(1),
-                    message.at(i+2));
+                    channel.at(0).toInt(),
+                    channel.at(1).mid(1),
+                    channel.at(2));
         channels.insert(ch->id(), ch);
     }
     return channels;
 }
 
-QMap<int, BoardMessage *> ConnectorOld::parseBoardMessages(QStringList message)
+QMap<int, BoardMessage *> ConnectorOld::parseBoardMessages(QString recvMessage)
 {
     QMap<int, BoardMessage *> messages;
     /*
@@ -143,24 +147,37 @@ MESSAGE_PROPERTIES = (
     ("time_id", int_decoder), ("deleted", int_decoder), ("post_time", time_decoder)
     )
       */
-    for (int i = 0; i < message.count() - 18; i = i + 19)
+
+    QStringList messagesList = recvMessage.split('\r');
+    messagesList.pop_front(); // Remove unknown args
+    messagesList.pop_back();  // Remove empty string
+
+    for (QStringList::const_iterator it = messagesList.constBegin();
+         it != messagesList.constEnd(); ++it)
     {
-        QString body = message.at(i+7);
+        QStringList message = (*it).split('\t');
+        QString body = message.at(7);
         body.replace(0x01, '\n');
+        bool ok;
         BoardMessage *msg = new BoardMessage(
-                    message.at(i).toInt(),
-                    message.at(i+2).toInt(),
-                    message.at(i+9).toInt(),
-                    message.at(i+16).toInt(),
-                    message.at(3).toInt(),
-                    message.at(17).toInt(),
-                    message.at(i+4),
-                    message.at(i+11),
-                    message.at(i+5),
-                    message.at(i+6),
+                    message.at(0).toInt(&ok),
+                    message.at(2).toInt(&ok),
+                    message.at(9).toInt(&ok),
+                    message.at(16).toInt(&ok),
+                    message.at(3).toInt(&ok),
+                    message.at(17).toInt(&ok),
+                    message.at(4),
+                    message.at(11),
+                    message.at(5),
+                    message.at(6),
                     body,
                     message.at(18),
                     message.at(8));
+        if (!ok)
+        {
+            qDebug() << "STRING_PARSER: fault convert!";
+            exit(1);
+        }
         messages.insert(msg->id(), msg);
         if (msg->timeId() > lastTimeId)
             lastTimeId = msg->timeId();
@@ -191,7 +208,7 @@ void ConnectorOld::boardUpdateMessages()
 {
     qDebug() << "CONNECTOR :: Do update messages";
 
-    QString req("Dlast\t%1\t\n");
-    req.arg(QString::number(lastTimeId));
+    QString req = "Dlast\t" +
+            QString::number(lastTimeId) + "\t\n";
     sendString(req);
 }

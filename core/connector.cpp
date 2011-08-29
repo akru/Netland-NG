@@ -21,6 +21,6 @@ void Connector::connectAll()
             this, SLOT(boardUpdateMessages()));
     connect(this, SIGNAL(boardMessagesRecv(QMap<int,BoardMessage*>)),
             _board, SLOT(updateMessages(QMap<int,BoardMessage*>)));
-    connect(this, SIGNAL(boardNewMessages()),
-            this, SLOT(boardUpdateMessages()));
+//    connect(this, SIGNAL(boardNewMessages()),
+//            this, SLOT(boardUpdateMessages()));
 }

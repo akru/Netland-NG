@@ -19,8 +19,8 @@ signals:
 
 private:
     void connectAll();
-    QMap<int, BoardChannel *> parseBoardChannels(QStringList message);
-    QMap<int, BoardMessage *> parseBoardMessages(QStringList message);
+    QMap<int, BoardChannel *> parseBoardChannels(QString recvMessage);
+    QMap<int, BoardMessage *> parseBoardMessages(QString recvMessage);
 
 private slots:
     void readString();

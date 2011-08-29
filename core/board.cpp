@@ -23,7 +23,9 @@ void Board::updateChannels(QMap<int, BoardChannel *> channels)
         QList<int>::const_iterator it;
         for (it = channels.keys().constBegin();
              it != channels.keys().constEnd(); ++it)
-            _channels[*it] = channels[*it];
+            if (_channels.keys().contains(*it))
+                delete _channels[*it];
+            _channels.insert(*it, channels[*it]);
     }
     else
         _channels = channels;
@@ -37,10 +39,14 @@ void Board::updateMessages(QMap<int, BoardMessage *> messages)
 
     if (!_messages.isEmpty())
     {
+        QList<int> messagesId = messages.keys();
         QList<int>::const_iterator it;
-        for (it = messages.keys().constBegin();
-             it != messages.keys().constEnd(); ++it)
-            _messages[*it] = messages[*it];
+        for (it = messagesId.constBegin();
+             it != messagesId.constEnd(); ++it)
+        {
+            delete _messages[*it];
+            _messages.insert(*it, messages[*it]);
+        }
     }
     else
         _messages = messages;
