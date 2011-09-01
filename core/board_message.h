@@ -2,14 +2,15 @@
 #define BOARD_MESSAGE_H
 
 #include <QObject>
+#include <QDateTime>
 
 class BoardMessage : public QObject
 {
     Q_OBJECT
 public:
-    explicit BoardMessage(int id, int parent_id, int channel_id, int time_id, int deleted, int delete_,
+    explicit BoardMessage(int id, int parent_id, int channel_id, int time_id, int deleted,
                           QString ip, QString mac, QString hostname, QString nick, QString body,
-                          QString post_time, QString edit_time);
+                          QDateTime valid_time, QDateTime post_time, QDateTime edit_time);
     inline int id()
     {
         return _id;
@@ -29,10 +30,6 @@ public:
     inline int deleted()
     {
         return _deleted;
-    }
-    inline int delete_()
-    {
-        return _delete_;
     }
     inline QString ip()
     {
@@ -54,11 +51,15 @@ public:
     {
         return _body;
     }
-    inline QString postTime()
+    inline QDateTime validTime()
+    {
+        return _valid_time;
+    }
+    inline QDateTime postTime()
     {
         return _post_time;
     }
-    inline QString editTime()
+    inline QDateTime editTime()
     {
         return _edit_time;
     }
@@ -68,8 +69,9 @@ signals:
 public slots:
 
 private:
-    int _id, _parent_id, _channel_id, _time_id, _deleted, _delete_;
-    QString _ip, _mac, _hostname, _nick, _body, _post_time, _edit_time;
+    int _id, _parent_id, _channel_id, _time_id, _deleted;
+    QString _ip, _mac, _hostname, _nick, _body;
+    QDateTime _valid_time, _post_time, _edit_time;
 
 };
 

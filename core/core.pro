@@ -5,17 +5,15 @@
 #-------------------------------------------------
 
 QT       += core network
-
 QT       -= gui
 
+TEMPLATE = lib
+
 TARGET = core
-CONFIG   += console
+CONFIG   += staticlib
 CONFIG   -= app_bundle
 
-TEMPLATE = app
-
-
-SOURCES += main.cpp \
+SOURCES += \
     encode.cpp \
     connector.cpp \
     connector_old.cpp \
@@ -23,7 +21,8 @@ SOURCES += main.cpp \
     chat.cpp \
     board_channel.cpp \
     board_message.cpp \
-    main_application.cpp
+    chat_channel.cpp \
+    chat_user.cpp
 
 HEADERS += \
     encode.h \
@@ -33,4 +32,5 @@ HEADERS += \
     chat.h \
     board_channel.h \
     board_message.h \
-    main_application.h
+    chat_channel.h \
+    chat_user.h

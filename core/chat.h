@@ -2,6 +2,10 @@
 #define CHAT_H
 
 #include <QObject>
+#include <QMap>
+
+#include "chat_channel.h"
+#include "chat_user.h"
 
 class Chat : public QObject
 {
@@ -12,6 +16,10 @@ public:
 signals:
 
 public slots:
+
+private:
+    QList<ChatChannel *> _channels;
+    QMap<int, ChatUser *> _users;
 
 };
 

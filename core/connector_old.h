@@ -21,16 +21,24 @@ private:
     void connectAll();
     QMap<int, BoardChannel *> parseBoardChannels(QString recvMessage);
     QMap<int, BoardMessage *> parseBoardMessages(QString recvMessage);
+    int actualityDaysConvert(int actualityDays);
 
 private slots:
     void readString();
     void stringParser(QByteArray recv);
     void authStringProcessing(QString req);
-    void sendString(QString str);
-    void isConnected();
 
     void boardUpdateMessages();
+    void boardAddMessage(BoardChannel *channel,
+                         QString text, int actualityDays);
+    void boardAddReply(BoardMessage *message, QString text);
+    void boardEditMessage(BoardMessage *message,
+                          QString text, int actualityDays);
+    void boardDeleteMessage(BoardMessage *message);
+    void boardUpMessage(BoardMessage *message);
 
+    void chatSetNick();
+    void chatUpdateUsers();
 
 private:
     QTextCodec *codec;

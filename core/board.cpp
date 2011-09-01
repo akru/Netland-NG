@@ -9,9 +9,6 @@ Board::Board(QObject *parent) :
 
 Board::~Board()
 {
-    QMap<int, BoardChannel *>::const_iterator it;
-    for (it = _channels.constBegin(); it != _channels.constEnd(); ++it)
-        delete *it;
 }
 
 void Board::updateChannels(QMap<int, BoardChannel *> channels)
@@ -20,11 +17,10 @@ void Board::updateChannels(QMap<int, BoardChannel *> channels)
 
     if (!_channels.isEmpty())
     {
+        QList<int> channelsId = channels.keys();
         QList<int>::const_iterator it;
-        for (it = channels.keys().constBegin();
-             it != channels.keys().constEnd(); ++it)
-            if (_channels.keys().contains(*it))
-                delete _channels[*it];
+        for (it = channelsId.constBegin();
+             it != channelsId.constEnd(); ++it)
             _channels.insert(*it, channels[*it]);
     }
     else
@@ -43,10 +39,7 @@ void Board::updateMessages(QMap<int, BoardMessage *> messages)
         QList<int>::const_iterator it;
         for (it = messagesId.constBegin();
              it != messagesId.constEnd(); ++it)
-        {
-            delete _messages[*it];
             _messages.insert(*it, messages[*it]);
-        }
     }
     else
         _messages = messages;
@@ -71,4 +64,31 @@ void Board::rebuildMessagesTree()
         }
     }
     qDebug() << "BOARD :: rebuild end";
+}
+
+void Board::addMessage(BoardChannel *channel,
+                       QString text, int actualityDays)
+{
+    emit doAddMessage(channel, text, actualityDays);
+}
+
+void Board::addReply(BoardMessage *message, QString text)
+{
+    emit doAddReply(message, text);
+}
+
+void Board::editMessage(BoardMessage *message,
+                        QString text, int actualityDays)
+{
+    emit doEditMessage(message, text, actualityDays);
+}
+
+void Board::deleteMessage(BoardMessage *message)
+{
+    emit doDeleteMessage(message);
+}
+
+void Board::upMessage(BoardMessage *message)
+{
+    emit doUpMessage(message);
 }

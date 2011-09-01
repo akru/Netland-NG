@@ -25,16 +25,6 @@ void ConnectorOld::connectAll()
 
     connect(this, SIGNAL(authRequestRecv(QString)),
             this, SLOT(authStringProcessing(QString)));
-    connect(this, SIGNAL(authStringReady(QString)),
-            this, SLOT(sendString(QString)));
-
-    connect(this, SIGNAL(connected()),
-            this, SLOT(isConnected()));
-}
-
-void ConnectorOld::isConnected()
-{
-    qDebug() << "connected";
 }
 
 void ConnectorOld::readString()
@@ -53,11 +43,6 @@ void ConnectorOld::readString()
     }
 }
 
-void ConnectorOld::sendString(QString str)
-{
-    write(str.toAscii());
-}
-
 void ConnectorOld::stringParser(QByteArray recv)
 {
     QString recvStr = codec->toUnicode(recv);
@@ -72,6 +57,14 @@ void ConnectorOld::stringParser(QByteArray recv)
         break;
     case 'b':       // Information
         emit infoMessage(message.at(0));
+        if (message.at(0).split(" ").count() == 7)
+        {
+            if (message.at(0).split(" ").at(2).at(8) == ',')
+            {
+                qDebug() << "CONN :: Auth success";
+                emit authSuccess();
+            }
+        }
         qDebug() << "Inform :: " << message;
         break;
     case 'd':       // Board
@@ -83,8 +76,9 @@ void ConnectorOld::stringParser(QByteArray recv)
         }
         else
         {
-            if (cmd == "new")
+            if (cmd == "new")  // New messages
             {
+                qDebug() << "CONN :: new messages avaible";
                 emit boardNewMessages();
             }
             else
@@ -93,15 +87,71 @@ void ConnectorOld::stringParser(QByteArray recv)
                 {
                 }
                 else
-                    emit boardMessagesRecv(parseBoardMessages(message.join("\t")));
+                {
+                    if (cmd == "admin")
+                    {
+                    }
+                    else
+                    {
+                        emit boardMessagesRecv(
+                                    parseBoardMessages(message.join("\t")));
+                    }
+                }
             }
         }
         //qDebug() << "DBoard :: " << message;
         break;
     case 'c':       // Chat
+        cmd = message.at(0);
+        if (cmd == "main")
+        {
+
+        }
+        else
+        {
+            if (cmd == "enter")
+            {
+
+            }
+            else
+            {
+                if (cmd == "leave")
+                {
+
+                }
+                else
+                {
+                    if (cmd == "private")
+                    {
+
+                    }
+                    else
+                    {
+                        if (cmd == "infoGet")
+                        {
+
+                        }
+                        else
+                        {
+                            if (cmd == "channels")
+                            {
+
+                            }
+                            else
+                            {
+                                if (cmd == "userlist")
+                                {
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         qDebug() << "Chat   :: " << message;
         break;
-     default:       // Uncategorsed
+     default:       // Uncategorised
         qDebug() << "Unctg  :: " << recvStr;
     }
 }
@@ -158,26 +208,21 @@ MESSAGE_PROPERTIES = (
         QStringList message = (*it).split('\t');
         QString body = message.at(7);
         body.replace(0x01, '\n');
-        bool ok;
+        QDateTime millenium(QDate(1999,12,31), QTime(23,00));  // Really?
         BoardMessage *msg = new BoardMessage(
-                    message.at(0).toInt(&ok),
-                    message.at(2).toInt(&ok),
-                    message.at(9).toInt(&ok),
-                    message.at(16).toInt(&ok),
-                    message.at(3).toInt(&ok),
-                    message.at(17).toInt(&ok),
+                    message.at(0).toInt(),
+                    message.at(2).toInt(),
+                    message.at(9).toInt(),
+                    message.at(16).toInt(),
+                    message.at(17).toInt(),
                     message.at(4),
                     message.at(11),
                     message.at(5),
                     message.at(6),
                     body,
-                    message.at(18),
-                    message.at(8));
-        if (!ok)
-        {
-            qDebug() << "STRING_PARSER: fault convert!";
-            exit(1);
-        }
+                    millenium.addSecs(message.at(3).toInt()),
+                    millenium.addSecs(message.at(18).toInt()),
+                    millenium.addSecs(message.at(8).toInt()));
         messages.insert(msg->id(), msg);
         if (msg->timeId() > lastTimeId)
             lastTimeId = msg->timeId();
@@ -185,30 +230,80 @@ MESSAGE_PROPERTIES = (
     return messages;
 }
 
+
 void ConnectorOld::authStringProcessing(QString req)
 {
     Encode enc(req, hash);
-    QString authCode = enc.getReply();
-    QString authString = QString(version) + "\t" +
+    QByteArray authCode = enc.getReply().toAscii();
+    QByteArray authString = QByteArray(version) + "\t" +
             authCode + "\tCPU_INFO\tOS_INFO\t" +
-            QHostInfo::localHostName() + "\n";
-    emit authStringReady(authString);
+            QHostInfo::localHostName().toAscii() + "\n";
+    write(authString);
 }
-
-//void ConnectorOld::baseInit()
-//{
-//    QString nickSetString = QString("cnik\t") + nick + "\n";
-//    QString userListString = QString("cUserList\n");
-
-//    QString baseInitString = nickSetString + userListString;
-//    emit baseInitReady(baseInitString);
-//}
 
 void ConnectorOld::boardUpdateMessages()
 {
-    qDebug() << "CONNECTOR :: Do update messages";
+    QByteArray req = "Dlast\t" +
+            QString::number(lastTimeId).toAscii() + "\t\n";
+    write(req);
+}
 
-    QString req = "Dlast\t" +
-            QString::number(lastTimeId) + "\t\n";
-    sendString(req);
+void ConnectorOld::boardAddMessage(BoardChannel *channel,
+                                   QString text, int actualityDays)
+{
+    QByteArray req = "Dadd\t" + QString::number(channel->id()).toAscii() +
+            "\t" + QString::number(actualityDaysConvert(actualityDays)).toAscii() +
+            "\t" + codec->fromUnicode(_nick) +
+            "\t" + codec->fromUnicode(text.replace('\n', '\r')) + "\n";
+    write(req);
+}
+
+void ConnectorOld::boardAddReply(BoardMessage *message, QString text)
+{
+    QByteArray req = "Dreply\t" + QString::number(message->id()).toAscii() +
+            "\t" + codec->fromUnicode(_nick) + "\t" +
+            codec->fromUnicode(text.replace('\n', '\r')) + "\t\t\n";
+    write(req);
+}
+
+void ConnectorOld::boardEditMessage(BoardMessage *message,
+                                    QString text, int actualityDays)
+{
+    QByteArray req = "Dedit\t" + QString::number(message->id()).toAscii() +
+            "\t" + QString::number(message->channelId()).toAscii() +
+            "\t" + QString::number(actualityDaysConvert(actualityDays)).toAscii() +
+            "\t" + QString::number(message->parentId()).toAscii() +
+            "\t" + codec->fromUnicode(_nick) +
+            "\t" + codec->fromUnicode(text.replace('\n', '\r')) + "\t\n";
+    write(req);
+}
+
+void ConnectorOld::boardDeleteMessage(BoardMessage *message)
+{
+    QByteArray req = "Ddel\t" + QString::number(message->id()).toAscii() +
+            "\t" + codec->fromUnicode(_nick) + "\t\t\n";
+    write(req);
+}
+
+void ConnectorOld::boardUpMessage(BoardMessage *message)
+{
+    QByteArray req = "Dup\t" + QString::number(message->id()).toAscii() + "\n";
+    write(req);
+}
+
+int ConnectorOld::actualityDaysConvert(int actualityDays)
+{
+    QDate today = QDate::currentDate();
+    return QDate(1899, 12, 30).daysTo(today.addDays(actualityDays));
+}
+
+void ConnectorOld::chatSetNick()
+{
+    QByteArray nickSetStr = "cnik\t" + _nick.toAscii() + "\n";
+    write(nickSetStr);
+}
+
+void ConnectorOld::chatUpdateUsers()
+{
+    write("cUserList\n");
 }

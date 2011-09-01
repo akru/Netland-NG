@@ -30,7 +30,24 @@ signals:
     void channelsUpdated();
     void messagesUpdated();
 
+    void doAddMessage(BoardChannel *channel,
+                      QString text, int actualityDays);
+    void doAddReply(BoardMessage *message, QString text);
+    void doEditMessage(BoardMessage *message,
+                       QString text, int actualityDays);
+    void doDeleteMessage(BoardMessage *message);
+    void doUpMessage(BoardMessage *message);
+
 public slots:
+    void addMessage(BoardChannel *channel,
+                    QString text, int actualityDays = 30);
+    void addReply(BoardMessage *message, QString text);
+    void editMessage(BoardMessage *message,
+                     QString text, int actualityDays = 30);
+    void deleteMessage(BoardMessage *message);
+    void upMessage(BoardMessage *message);
+
+private slots:
     void updateChannels(QMap<int, BoardChannel *> channels);
     void updateMessages(QMap<int, BoardMessage *> messages);
 

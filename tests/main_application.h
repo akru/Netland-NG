@@ -2,9 +2,8 @@
 #define MAIN_APPLICATION_H
 
 #include <QtCore/QCoreApplication>
-#include <QHostAddress>
 
-#include "connector.h"
+#include <connector.h>
 
 class MainApplication : public QCoreApplication
 {
@@ -17,12 +16,13 @@ private:
     void connectAll();
 
 public slots:
+    void testAuthentification();
     void testViewChannels();
     void testViewMessages();
 
 private:
     Connector *conn;
-    QHostAddress server;
+    QString server;
 };
 
 #endif // MAIN_APPLICATION_H
