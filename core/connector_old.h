@@ -21,7 +21,13 @@ private:
     void connectAll();
     QMap<int, BoardChannel *> parseBoardChannels(QString recvMessage);
     QMap<int, BoardMessage *> parseBoardMessages(QString recvMessage);
+    QMap<QString, ChatChannel *>  parseChatChannels(QString recvMessage);
+    QMap<QString, ChatUser *> parseChatUsers(QStringList recvMessage);
+    ChatUser * parseEnteredUser(QString recvMessage);
+    ChatPrivate * parseChatPrivate(QString recvMessage);
+
     int actualityDaysConvert(int actualityDays);
+
 
 private slots:
     void readString();

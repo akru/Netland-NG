@@ -17,14 +17,8 @@ public:
     {
         return _channels.values();
     }
-    inline BoardChannel * getChannel(int id)
-    {
-        return _channels[id];
-    }
-    inline BoardMessage * getMessage(int id)
-    {
-        return _messages[id];
-    }
+    BoardChannel * getChannel(int id);
+    BoardMessage * getMessage(int id);
 
 signals:
     void channelsUpdated();

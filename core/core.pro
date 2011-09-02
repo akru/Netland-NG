@@ -22,7 +22,8 @@ SOURCES += \
     board_channel.cpp \
     board_message.cpp \
     chat_channel.cpp \
-    chat_user.cpp
+    chat_user.cpp \
+    chat_private.cpp
 
 HEADERS += \
     encode.h \
@@ -33,4 +34,5 @@ HEADERS += \
     board_channel.h \
     board_message.h \
     chat_channel.h \
-    chat_user.h
+    chat_user.h \
+    chat_private.h

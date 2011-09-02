@@ -3,6 +3,8 @@
 #include <connector_old.h>
 #include <board_channel.h>
 #include <board_message.h>
+#include <chat_channel.h>
+#include <chat_user.h>
 
 MainApplication::MainApplication(int argc, char *argv[])
     : QCoreApplication(argc, argv),
@@ -25,6 +27,12 @@ void MainApplication::connectAll()
             this, SLOT(testViewChannels()));
     connect(conn->getBoardInstance(), SIGNAL(messagesUpdated()),
             this, SLOT(testViewMessages()));
+    connect(conn->getChatInstance(), SIGNAL(usersUpdated(QString)),
+            this, SLOT(testViewChat(QString)));
+    connect(conn->getChatInstance(), SIGNAL(userConnected(ChatUser*)),
+            this, SLOT(testChatUCon(ChatUser*)));
+    connect(conn->getChatInstance(), SIGNAL(userDisconnected(ChatUser*)),
+            this, SLOT(testChatUDiscon(ChatUser*)));
 }
 
 // Tests
@@ -37,7 +45,7 @@ void MainApplication::testAuthentification()
 
 void MainApplication::testViewChannels()
 {
-    qDebug() << "View channels:";
+    qDebug() << "View board channels:";
 
     QList<BoardChannel *> channels = conn->getBoardInstance()->channels();
     QList<BoardChannel *>::const_iterator it;
@@ -50,7 +58,7 @@ void MainApplication::testViewChannels()
 
 void MainApplication::testViewMessages()
 {
-    qDebug() << "View messages:";
+    qDebug() << "View board messages:";
     BoardChannel *ch = conn->getBoardInstance()->channels().at(0);
     qDebug() << ch->name() << ":";
 
@@ -63,4 +71,21 @@ void MainApplication::testViewMessages()
                     ((BoardMessage *) *it)->editTime() << "\n + [" <<
                     ((BoardMessage *) *it)->children().count() << "]\n\n";
     }
+}
+
+void MainApplication::testViewChat(QString channelId)
+{
+    ChatChannel *ch = conn->getChatInstance()->getChannel(channelId);
+    qDebug() << ch->name() << "::" <<
+                    ch->users().count() << "users";
+}
+
+void MainApplication::testChatUCon(ChatUser *user)
+{
+    qDebug() << "Chat:" << user->nick() << "connected";
+}
+
+void MainApplication::testChatUDiscon(ChatUser *user)
+{
+    qDebug() << "Chat:" << user->nick() << "disconnected";
 }

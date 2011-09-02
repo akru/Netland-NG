@@ -21,10 +21,6 @@ public:
         return _description;
     }
 
-signals:
-
-public slots:
-
 private:
     int _id;
     QString _name, _description;

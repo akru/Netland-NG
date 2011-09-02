@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "chat.h"
+#include "chat_private.h"
 
 #include <QDateTime>
 #include <QTcpSocket>
@@ -34,8 +35,11 @@ signals:
     void boardMessagesRecv(QMap<int, BoardMessage *> messages);
     void boardNewMessages();
     void nickIsSet();
-    void chatUserEnter(ChatUser *user);
-    void chatUserLeave(ChatUser *user);
+    void chatChannelsRecv(QMap<QString, ChatChannel *> channels);
+    void chatUsersRecv(QString channelId, QMap<QString, ChatUser *> users);
+    void chatUserEnter(QString channelId, ChatUser *user);
+    void chatUserLeave(QString channelId, QString userId);
+    void chatPrivateMessage(ChatPrivate *message);
 
 protected:
     QString _nick;

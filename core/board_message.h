@@ -64,10 +64,6 @@ public:
         return _edit_time;
     }
 
-signals:
-
-public slots:
-
 private:
     int _id, _parent_id, _channel_id, _time_id, _deleted;
     QString _ip, _mac, _hostname, _nick, _body;

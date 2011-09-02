@@ -12,14 +12,32 @@ class Chat : public QObject
     Q_OBJECT
 public:
     explicit Chat(QObject *parent = 0);
+    inline QList<ChatChannel *> channels()
+    {
+        return _channels.values();
+    }
+    ChatChannel * getChannel(QString id);
 
 signals:
+    void channelsUpdated();
+    void usersUpdated(QString channelId);
+    void userConnected(ChatUser *user);
+    void userDisconnected(ChatUser *user);
 
 public slots:
 
 private:
-    QList<ChatChannel *> _channels;
-    QMap<int, ChatUser *> _users;
+    void connectChannels();
+
+private slots:
+    void updateChannels(QMap<QString, ChatChannel *> channels);
+    void updateUsers(QString channelId,
+                     QMap<QString, ChatUser *> users);
+    void insertUser(QString channelId, ChatUser *user);
+    void removeUser(QString channelId, QString userId);
+
+private:
+    QMap<QString, ChatChannel *> _channels;
 
 };
 

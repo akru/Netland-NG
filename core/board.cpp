@@ -11,6 +11,22 @@ Board::~Board()
 {
 }
 
+BoardChannel * Board::getChannel(int id)
+{
+    if (_channels.keys().contains(id))
+        return _channels[id];
+    else
+        return 0;
+}
+
+BoardMessage * Board::getMessage(int id)
+{
+    if (_messages.keys().contains(id))
+        return _messages[id];
+    else
+        return 0;
+}
+
 void Board::updateChannels(QMap<int, BoardChannel *> channels)
 {
     qDebug() << "BOARD :: channels receved";

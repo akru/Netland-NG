@@ -32,6 +32,16 @@ void Connector::connectAll()
             this, SLOT(boardUpMessage(BoardMessage*)));
     // Chat functional
     connect(this, SIGNAL(nickIsSet()), this, SLOT(chatSetNick()));
+    connect(this, SIGNAL(chatChannelsRecv(QMap<QString,ChatChannel*>)),
+            _chat, SLOT(updateChannels(QMap<QString,ChatChannel*>)));
+    connect(_chat, SIGNAL(channelsUpdated()),
+            this, SLOT(chatUpdateUsers()));
+    connect(this, SIGNAL(chatUsersRecv(QString,QMap<QString,ChatUser*>)),
+            _chat, SLOT(updateUsers(QString,QMap<QString,ChatUser*>)));
+    connect(this, SIGNAL(chatUserEnter(QString,ChatUser*)),
+            _chat, SLOT(insertUser(QString,ChatUser*)));
+    connect(this, SIGNAL(chatUserLeave(QString,QString)),
+            _chat, SLOT(removeUser(QString,QString)));
 }
 
 void Connector::setNick(QString nick)

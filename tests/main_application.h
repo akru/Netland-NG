@@ -19,6 +19,9 @@ public slots:
     void testAuthentification();
     void testViewChannels();
     void testViewMessages();
+    void testViewChat(QString channelId);
+    void testChatUCon(ChatUser *user);
+    void testChatUDiscon(ChatUser *user);
 
 private:
     Connector *conn;
