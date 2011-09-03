@@ -16,7 +16,8 @@ ConnectorOld::ConnectorOld(QObject *parent)
     connectAll();
 }
 
-void ConnectorOld::connectAll()
+void
+ConnectorOld::connectAll()
 {
     connect(this, SIGNAL(readyRead()),
             this, SLOT(readString()));
@@ -27,7 +28,8 @@ void ConnectorOld::connectAll()
             this, SLOT(authStringProcessing(QString)));
 }
 
-void ConnectorOld::readString()
+void
+ConnectorOld::readString()
 {
     recvBuffer += readAll();
     if (recvBuffer.split('\n').count() == 1)    // Verify for not full message
@@ -43,7 +45,8 @@ void ConnectorOld::readString()
     }
 }
 
-void ConnectorOld::stringParser(QByteArray recv)
+void
+ConnectorOld::stringParser(QByteArray recv)
 {
     QString recvStr = codec->toUnicode(recv);
     QChar category = recvStr[0];                        // First symbol of string
@@ -61,7 +64,6 @@ void ConnectorOld::stringParser(QByteArray recv)
         {
             if (message.at(0).split(" ").at(2).at(8) == ',')
             {
-                qDebug() << "CONN :: Auth success";
                 emit authSuccess();
             }
         }
@@ -124,7 +126,10 @@ void ConnectorOld::stringParser(QByteArray recv)
                 {
                     QString channelId = message.at(0);
                     if (getChatInstance()->getChannel(channelId))
-                        emit chatUserLeave(
+                        if (getChatInstance()->
+                                getChannel(channelId)->
+                                    getUser(message.at(2)) != NULL)
+                            emit chatUserLeave(
                                 channelId,
                                 message.at(2));
                 }
@@ -165,16 +170,17 @@ void ConnectorOld::stringParser(QByteArray recv)
                 }
             }
         }
-        qDebug() << "Chat   :: " << message;
+//        qDebug() << "Chat   :: " << message;
         break;
      default:       // Uncategorised
         qDebug() << "Unctg  :: " << recvStr;
     }
 }
 
-QMap<int, BoardChannel *> ConnectorOld::parseBoardChannels(QString recvMessage)
+QMap<int, shared_ptr<BoardChannel>>
+ConnectorOld::parseBoardChannels(QString recvMessage)
 {
-    QMap<int, BoardChannel *> channels;
+    QMap<int, shared_ptr<BoardChannel>> channels;
     /*
       Thanks Assaron
 
@@ -188,18 +194,20 @@ CHANNEL_PROPERTIES = (("id", int_decoder),
          it != channelsList.constEnd(); ++it)
     {
         QStringList channel = (*it).split('\t');
-        BoardChannel *ch = new BoardChannel(
-                    channel.at(0).toInt(),
-                    channel.at(1).mid(1),
-                    channel.at(2));
+        shared_ptr<BoardChannel> ch(
+                    new BoardChannel(
+                        channel.at(0).toInt(),
+                        channel.at(1).mid(1),
+                        channel.at(2)));
         channels.insert(ch->id(), ch);
     }
     return channels;
 }
 
-QMap<int, BoardMessage *> ConnectorOld::parseBoardMessages(QString recvMessage)
+QMap<int, shared_ptr<BoardMessage>>
+ConnectorOld::parseBoardMessages(QString recvMessage)
 {
-    QMap<int, BoardMessage *> messages;
+    QMap<int, shared_ptr<BoardMessage>> messages;
     /*
       Thanks Assaron
 
@@ -225,7 +233,8 @@ MESSAGE_PROPERTIES = (
         QString body = message.at(7);
         body.replace(0x01, '\n');
         QDateTime millenium(QDate(1999,12,31), QTime(23,00));  // Really?
-        BoardMessage *msg = new BoardMessage(
+        shared_ptr<BoardMessage> msg(
+            new BoardMessage(
                     message.at(0).toInt(),
                     message.at(2).toInt(),
                     message.at(9).toInt(),
@@ -238,7 +247,7 @@ MESSAGE_PROPERTIES = (
                     body,
                     millenium.addSecs(message.at(3).toInt()),
                     millenium.addSecs(message.at(18).toInt()),
-                    millenium.addSecs(message.at(8).toInt()));
+                    millenium.addSecs(message.at(8).toInt())));
         messages.insert(msg->id(), msg);
         if (msg->timeId() > lastTimeId)
             lastTimeId = msg->timeId();
@@ -246,26 +255,29 @@ MESSAGE_PROPERTIES = (
     return messages;
 }
 
-QMap<QString, ChatChannel *> ConnectorOld::parseChatChannels(QString recvMessage)
+QMap<QString, shared_ptr<ChatChannel>>
+ConnectorOld::parseChatChannels(QString recvMessage)
 {
-    QMap<QString, ChatChannel *> channels;
+    QMap<QString, shared_ptr<ChatChannel>> channels;
     QStringList channelsList = recvMessage.split("\r");
     channelsList.pop_back(); // Remove empty string
     for (QStringList::const_iterator it = channelsList.constBegin();
          it != channelsList.constEnd(); ++it)
     {
         QStringList channel = (*it).split('\t');
-        ChatChannel *ch = new ChatChannel(
-                    channel.at(0),
-                    channel.at(1));
+        shared_ptr<ChatChannel> ch(
+                    new ChatChannel(
+                        channel.at(0),
+                        channel.at(1)));
         channels.insert(ch->id(), ch);
     }
     return channels;
 }
 
-QMap<QString, ChatUser *> ConnectorOld::parseChatUsers(QStringList recvMessage)
+QMap<QString, shared_ptr<ChatUser>>
+ConnectorOld::parseChatUsers(QStringList recvMessage)
 {
-    QMap<QString, ChatUser *> users;
+    QMap<QString, shared_ptr<ChatUser> > users;
     QString channelId = recvMessage.at(0);
     recvMessage.pop_front(); // Remove channelId
     QStringList usersList = recvMessage.join("\t").split("\r");
@@ -276,30 +288,34 @@ QMap<QString, ChatUser *> ConnectorOld::parseChatUsers(QStringList recvMessage)
          it != usersList.constEnd(); ++it)
     {
         QStringList user = (*it).split('\t');
-        ChatUser *us = new ChatUser(
-                    channelId,
-                    user.at(0),
-                    user.at(1),
-                    user.at(2),
-                    user.at(3));
+        shared_ptr<ChatUser> us(
+            new ChatUser(
+                        channelId,
+                        user.at(0),
+                        user.at(1),
+                        user.at(2),
+                        user.at(3)));
         users.insert(us->id(), us);
     }
     return users;
 }
 
-ChatUser * ConnectorOld::parseEnteredUser(QString recvMessage)
+shared_ptr<ChatUser>
+ConnectorOld::parseEnteredUser(QString recvMessage)
 {
     QStringList user = recvMessage.split("\t");
-    ChatUser *us = new ChatUser(
+    shared_ptr<ChatUser> us(
+            new ChatUser(
                 user.at(0),
                 user.at(2),
                 user.at(3),
                 user.at(4),
-                user.at(5));
+                user.at(5)));
     return us;
 }
 
-ChatPrivate * ConnectorOld::parseChatPrivate(QString recvMessage)
+ChatPrivate *
+ConnectorOld::parseChatPrivate(QString recvMessage)
 {
     qDebug() << recvMessage.at(0);
     return new ChatPrivate("", "", "");
@@ -315,69 +331,77 @@ void ConnectorOld::authStringProcessing(QString req)
     write(authString);
 }
 
-void ConnectorOld::boardUpdateMessages()
+void
+ConnectorOld::boardUpdateMessages()
 {
     QByteArray req = "Dlast\t" +
             QString::number(lastTimeId).toAscii() + "\t\n";
     write(req);
 }
 
-void ConnectorOld::boardAddMessage(BoardChannel *channel,
-                                   QString text, int actualityDays)
+void
+ConnectorOld::boardAddMessage(int channelId, QString text, int actualityDays)
 {
-    QByteArray req = "Dadd\t" + QString::number(channel->id()).toAscii() +
+    QByteArray req = "Dadd\t" + QString::number(channelId).toAscii() +
             "\t" + QString::number(actualityDaysConvert(actualityDays)).toAscii() +
             "\t" + codec->fromUnicode(_nick) +
             "\t" + codec->fromUnicode(text.replace('\n', '\r')) + "\n";
     write(req);
 }
 
-void ConnectorOld::boardAddReply(BoardMessage *message, QString text)
+void
+ConnectorOld::boardAddReply(int messageId, QString text)
 {
-    QByteArray req = "Dreply\t" + QString::number(message->id()).toAscii() +
+    QByteArray req = "Dreply\t" + QString::number(messageId).toAscii() +
             "\t" + codec->fromUnicode(_nick) + "\t" +
             codec->fromUnicode(text.replace('\n', '\r')) + "\t\t\n";
     write(req);
 }
 
-void ConnectorOld::boardEditMessage(BoardMessage *message,
-                                    QString text, int actualityDays)
+void
+ConnectorOld::boardEditMessage(int messageId, QString text, int actualityDays)
 {
-    QByteArray req = "Dedit\t" + QString::number(message->id()).toAscii() +
-            "\t" + QString::number(message->channelId()).toAscii() +
+    shared_ptr<BoardMessage> msg = getBoardInstance()->getMessage(messageId);
+    QByteArray req = "Dedit\t" + QString::number(messageId).toAscii() +
+            "\t" + QString::number(msg->channelId()).toAscii() +
             "\t" + QString::number(actualityDaysConvert(actualityDays)).toAscii() +
-            "\t" + QString::number(message->parentId()).toAscii() +
+            "\t" + QString::number(msg->parentId()).toAscii() +
             "\t" + codec->fromUnicode(_nick) +
             "\t" + codec->fromUnicode(text.replace('\n', '\r')) + "\t\n";
     write(req);
 }
 
-void ConnectorOld::boardDeleteMessage(BoardMessage *message)
+void
+ConnectorOld::boardDeleteMessage(int messageId)
 {
-    QByteArray req = "Ddel\t" + QString::number(message->id()).toAscii() +
+    QByteArray req = "Ddel\t" + QString::number(messageId).toAscii() +
             "\t" + codec->fromUnicode(_nick) + "\t\t\n";
     write(req);
 }
 
-void ConnectorOld::boardUpMessage(BoardMessage *message)
+void
+ConnectorOld::boardUpMessage(int messageId)
 {
-    QByteArray req = "Dup\t" + QString::number(message->id()).toAscii() + "\n";
+    QByteArray req = "Dup\t" + QString::number(messageId).toAscii() + "\n";
     write(req);
 }
 
-int ConnectorOld::actualityDaysConvert(int actualityDays)
+int
+ConnectorOld::actualityDaysConvert(int actualityDays)
 {
     QDate today = QDate::currentDate();
     return QDate(1899, 12, 30).daysTo(today.addDays(actualityDays));
 }
 
-void ConnectorOld::chatSetNick()
+void
+ConnectorOld::chatSetNick()
 {
     QByteArray nickSetStr = "cnik\t" + _nick.toAscii() + "\n";
     write(nickSetStr);
 }
 
-void ConnectorOld::chatUpdateUsers()
+void
+ConnectorOld::chatUpdateUsers()
 {
     write("cUserList\n");
 }

@@ -8,7 +8,6 @@ class ChatUser
 public:
     explicit ChatUser(QString channelId, QString id, QString nick,
                       QString ip, QString computerName);
-    ChatUser(ChatUser *user);
     inline QString id()
     {
         return _id;

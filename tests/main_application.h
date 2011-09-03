@@ -20,8 +20,8 @@ public slots:
     void testViewChannels();
     void testViewMessages();
     void testViewChat(QString channelId);
-    void testChatUCon(ChatUser *user);
-    void testChatUDiscon(ChatUser *user);
+    void testChatUCon(shared_ptr<ChatUser> user);
+    void testChatUDiscon(shared_ptr<ChatUser> user);
 
 private:
     Connector *conn;

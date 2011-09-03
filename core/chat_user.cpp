@@ -6,9 +6,3 @@ ChatUser::ChatUser(QString channelId, QString id,
       _ip(ip), _computer_name(computerName)
 {
 }
-
-ChatUser::ChatUser(ChatUser *user)
-    : _channel_id(user->channelId()), _id(user->id()), _nick(user->nick()),
-      _ip(user->ip()), _computer_name(user->computerName())
-{
-}

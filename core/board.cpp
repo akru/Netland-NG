@@ -1,7 +1,5 @@
 #include "board.h"
 
-#include <QDebug>
-
 Board::Board(QObject *parent) :
     QObject(parent)
 {
@@ -11,26 +9,8 @@ Board::~Board()
 {
 }
 
-BoardChannel * Board::getChannel(int id)
+void Board::updateChannels(QMap<int, shared_ptr<BoardChannel>> channels)
 {
-    if (_channels.keys().contains(id))
-        return _channels[id];
-    else
-        return 0;
-}
-
-BoardMessage * Board::getMessage(int id)
-{
-    if (_messages.keys().contains(id))
-        return _messages[id];
-    else
-        return 0;
-}
-
-void Board::updateChannels(QMap<int, BoardChannel *> channels)
-{
-    qDebug() << "BOARD :: channels receved";
-
     if (!_channels.isEmpty())
     {
         QList<int> channelsId = channels.keys();
@@ -45,10 +25,8 @@ void Board::updateChannels(QMap<int, BoardChannel *> channels)
     emit channelsUpdated();
 }
 
-void Board::updateMessages(QMap<int, BoardMessage *> messages)
+void Board::updateMessages(QMap<int, shared_ptr<BoardMessage>> messages)
 {
-    qDebug() << "BOARD :: messages receved";
-
     if (!_messages.isEmpty())
     {
         QList<int> messagesId = messages.keys();
@@ -65,46 +43,44 @@ void Board::updateMessages(QMap<int, BoardMessage *> messages)
 
 void Board::rebuildMessagesTree()
 {
-    qDebug() << "BOARD :: rebuild start";
     if (!_messages.isEmpty())
     {
-        QList<BoardMessage *> msg = _messages.values();
-        QList<BoardMessage *>::const_iterator it;
+        QList<shared_ptr<BoardMessage>> msg = _messages.values();
+        QList<shared_ptr<BoardMessage>>::const_iterator it;
         for (it = msg.constBegin();
              it != msg.constEnd(); ++it)
         {
             if ((*it)->parentId() == -1)
-                (*it)->setParent(getChannel((*it)->channelId()));
+                (*it)->setParent(getChannel((*it)->channelId()).get());
             else
-                (*it)->setParent(getMessage((*it)->parentId()));
+                (*it)->setParent(getMessage((*it)->parentId()).get());
         }
     }
-    qDebug() << "BOARD :: rebuild end";
 }
 
-void Board::addMessage(BoardChannel *channel,
+void Board::addMessage(int channelId,
                        QString text, int actualityDays)
 {
-    emit doAddMessage(channel, text, actualityDays);
+    emit doAddMessage(channelId, text, actualityDays);
 }
 
-void Board::addReply(BoardMessage *message, QString text)
+void Board::addReply(int messageId, QString text)
 {
-    emit doAddReply(message, text);
+    emit doAddReply(messageId, text);
 }
 
-void Board::editMessage(BoardMessage *message,
+void Board::editMessage(int messageId,
                         QString text, int actualityDays)
 {
-    emit doEditMessage(message, text, actualityDays);
+    emit doEditMessage(messageId, text, actualityDays);
 }
 
-void Board::deleteMessage(BoardMessage *message)
+void Board::deleteMessage(int messageId)
 {
-    emit doDeleteMessage(message);
+    emit doDeleteMessage(messageId);
 }
 
-void Board::upMessage(BoardMessage *message)
+void Board::upMessage(int messageId)
 {
-    emit doUpMessage(message);
+    emit doUpMessage(messageId);
 }

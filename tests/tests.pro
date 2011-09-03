@@ -11,6 +11,8 @@ TARGET = tests
 CONFIG   += console
 CONFIG   -= app_bundle
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 INCLUDEPATH += ../core
 LIBS += -L../core -lcore
 

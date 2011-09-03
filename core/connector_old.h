@@ -19,12 +19,24 @@ signals:
 
 private:
     void connectAll();
-    QMap<int, BoardChannel *> parseBoardChannels(QString recvMessage);
-    QMap<int, BoardMessage *> parseBoardMessages(QString recvMessage);
-    QMap<QString, ChatChannel *>  parseChatChannels(QString recvMessage);
-    QMap<QString, ChatUser *> parseChatUsers(QStringList recvMessage);
-    ChatUser * parseEnteredUser(QString recvMessage);
-    ChatPrivate * parseChatPrivate(QString recvMessage);
+
+    QMap<int, shared_ptr<BoardChannel>>
+    parseBoardChannels(QString recvMessage);
+
+    QMap<int, shared_ptr<BoardMessage>>
+    parseBoardMessages(QString recvMessage);
+
+    QMap<QString, shared_ptr<ChatChannel>>
+    parseChatChannels(QString recvMessage);
+
+    QMap<QString, shared_ptr<ChatUser> >
+    parseChatUsers(QStringList recvMessage);
+
+    shared_ptr<ChatUser>
+    parseEnteredUser(QString recvMessage);
+
+    ChatPrivate *
+    parseChatPrivate(QString recvMessage);
 
     int actualityDaysConvert(int actualityDays);
 
@@ -35,13 +47,13 @@ private slots:
     void authStringProcessing(QString req);
 
     void boardUpdateMessages();
-    void boardAddMessage(BoardChannel *channel,
+    void boardAddMessage(int channelId,
                          QString text, int actualityDays);
-    void boardAddReply(BoardMessage *message, QString text);
-    void boardEditMessage(BoardMessage *message,
+    void boardAddReply(int messageId, QString text);
+    void boardEditMessage(int messageId,
                           QString text, int actualityDays);
-    void boardDeleteMessage(BoardMessage *message);
-    void boardUpMessage(BoardMessage *message);
+    void boardDeleteMessage(int messageId);
+    void boardUpMessage(int messageId);
 
     void chatSetNick();
     void chatUpdateUsers();

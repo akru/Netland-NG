@@ -5,12 +5,12 @@ ChatChannel::ChatChannel(QString id, QString name)
 {
 }
 
-void ChatChannel::updateUsers(QMap<QString, ChatUser *> users)
+void ChatChannel::updateUsers(QMap<QString, shared_ptr<ChatUser>> users)
 {
     _users = users;
 }
 
-void ChatChannel::insertUser(ChatUser *user)
+void ChatChannel::insertUser(shared_ptr<ChatUser> user)
 {
     _users.insert(user->id(), user);
 }

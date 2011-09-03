@@ -13,6 +13,8 @@ TARGET = core
 CONFIG   += staticlib
 CONFIG   -= app_bundle
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 SOURCES += \
     encode.cpp \
     connector.cpp \

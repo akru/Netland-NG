@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QMap>
 
+#include <boost/shared_ptr.hpp>
+using namespace boost;
+
 #include "board_channel.h"
 #include "board_message.h"
 
@@ -13,44 +16,50 @@ class Board : public QObject
 public:
     explicit Board(QObject *parent = 0);
     ~Board();
-    inline QList<BoardChannel *> channels()
+    inline QList<shared_ptr<BoardChannel>> channels()
     {
         return _channels.values();
     }
-    BoardChannel * getChannel(int id);
-    BoardMessage * getMessage(int id);
+    inline shared_ptr<BoardChannel> getChannel(int id)
+    {
+        return _channels[id];
+    }
+    inline shared_ptr<BoardMessage> getMessage(int id)
+    {
+        return _messages[id];
+    }
 
 signals:
     void channelsUpdated();
     void messagesUpdated();
 
-    void doAddMessage(BoardChannel *channel,
+    void doAddMessage(int channelId,
                       QString text, int actualityDays);
-    void doAddReply(BoardMessage *message, QString text);
-    void doEditMessage(BoardMessage *message,
+    void doAddReply(int messageId, QString text);
+    void doEditMessage(int messageId,
                        QString text, int actualityDays);
-    void doDeleteMessage(BoardMessage *message);
-    void doUpMessage(BoardMessage *message);
+    void doDeleteMessage(int messageId);
+    void doUpMessage(int messageId);
 
 public slots:
-    void addMessage(BoardChannel *channel,
+    void addMessage(int channelId,
                     QString text, int actualityDays = 30);
-    void addReply(BoardMessage *message, QString text);
-    void editMessage(BoardMessage *message,
+    void addReply(int messageId, QString text);
+    void editMessage(int messageId,
                      QString text, int actualityDays = 30);
-    void deleteMessage(BoardMessage *message);
-    void upMessage(BoardMessage *message);
+    void deleteMessage(int messageId);
+    void upMessage(int messageId);
 
 private slots:
-    void updateChannels(QMap<int, BoardChannel *> channels);
-    void updateMessages(QMap<int, BoardMessage *> messages);
+    void updateChannels(QMap<int, shared_ptr<BoardChannel>> channels);
+    void updateMessages(QMap<int, shared_ptr<BoardMessage>> messages);
 
 private:
     void rebuildMessagesTree();
 
 private:
-    QMap<int, BoardChannel *> _channels;
-    QMap<int, BoardMessage *> _messages;
+    QMap<int, shared_ptr<BoardChannel>> _channels;
+    QMap<int, shared_ptr<BoardMessage>> _messages;
 };
 
 #endif // BOARD_H

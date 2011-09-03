@@ -29,10 +29,10 @@ void MainApplication::connectAll()
             this, SLOT(testViewMessages()));
     connect(conn->getChatInstance(), SIGNAL(usersUpdated(QString)),
             this, SLOT(testViewChat(QString)));
-    connect(conn->getChatInstance(), SIGNAL(userConnected(ChatUser*)),
-            this, SLOT(testChatUCon(ChatUser*)));
-    connect(conn->getChatInstance(), SIGNAL(userDisconnected(ChatUser*)),
-            this, SLOT(testChatUDiscon(ChatUser*)));
+    connect(conn->getChatInstance(), SIGNAL(userConnected(shared_ptr<ChatUser>)),
+            this, SLOT(testChatUCon(shared_ptr<ChatUser>)));
+    connect(conn->getChatInstance(), SIGNAL(userDisconnected(shared_ptr<ChatUser>)),
+            this, SLOT(testChatUDiscon(shared_ptr<ChatUser>)));
 }
 
 // Tests
@@ -47,8 +47,8 @@ void MainApplication::testViewChannels()
 {
     qDebug() << "View board channels:";
 
-    QList<BoardChannel *> channels = conn->getBoardInstance()->channels();
-    QList<BoardChannel *>::const_iterator it;
+    QList<shared_ptr<BoardChannel>> channels = conn->getBoardInstance()->channels();
+    QList<shared_ptr<BoardChannel>>::const_iterator it;
     for (it = channels.constBegin();
          it != channels.constEnd(); ++it)
     {
@@ -59,7 +59,7 @@ void MainApplication::testViewChannels()
 void MainApplication::testViewMessages()
 {
     qDebug() << "View board messages:";
-    BoardChannel *ch = conn->getBoardInstance()->channels().at(0);
+    shared_ptr<BoardChannel> ch = conn->getBoardInstance()->channels().at(0);
     qDebug() << ch->name() << ":";
 
     QObjectList messages = ch->children();
@@ -75,17 +75,17 @@ void MainApplication::testViewMessages()
 
 void MainApplication::testViewChat(QString channelId)
 {
-    ChatChannel *ch = conn->getChatInstance()->getChannel(channelId);
+    shared_ptr<ChatChannel> ch = conn->getChatInstance()->getChannel(channelId);
     qDebug() << ch->name() << "::" <<
                     ch->users().count() << "users";
 }
 
-void MainApplication::testChatUCon(ChatUser *user)
+void MainApplication::testChatUCon(shared_ptr<ChatUser> user)
 {
     qDebug() << "Chat:" << user->nick() << "connected";
 }
 
-void MainApplication::testChatUDiscon(ChatUser *user)
+void MainApplication::testChatUDiscon(shared_ptr<ChatUser> user)
 {
     qDebug() << "Chat:" << user->nick() << "disconnected";
 }
