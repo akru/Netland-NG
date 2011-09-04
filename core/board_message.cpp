@@ -1,12 +1,34 @@
 #include "board_message.h"
+#include "connector.h"
 
-BoardMessage::BoardMessage(int id, int parent_id, int channel_id, int time_id,
+BoardMessage::BoardMessage(Connector *conn,
+                           int id, int parent_id, int channel_id, int time_id,
                            int deleted, QString ip, QString mac, QString hostname,
                            QString nick, QString body, QDateTime valid_time,
                            QDateTime post_time, QDateTime edit_time)
-    : _id(id), _parent_id(parent_id), _channel_id(channel_id), _time_id(time_id),
-      _deleted(deleted),
-      _ip(ip), _mac(mac), _hostname(hostname), _nick(nick), _body(body),
-      _valid_time(valid_time), _post_time(post_time), _edit_time(edit_time)
+    : _conn(conn), _id(id), _parent_id(parent_id), _channel_id(channel_id),
+      _time_id(time_id), _deleted(deleted), _ip(ip), _mac(mac),
+      _hostname(hostname), _nick(nick), _body(body), _valid_time(valid_time),
+      _post_time(post_time), _edit_time(edit_time)
 {
+}
+
+void BoardMessage::addReply(QString text)
+{
+  _conn->boardAddReply(_id, text);
+}
+
+void BoardMessage::editMessage(QString text, int actualityDays)
+{
+  _conn->boardEditMessage(_id, text, actualityDays);
+}
+
+void BoardMessage::deleteMessage()
+{
+  _conn->boardDeleteMessage(_id);
+}
+
+void BoardMessage::upMessage()
+{
+  _conn->boardUpMessage(_id);
 }

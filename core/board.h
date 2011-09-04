@@ -7,14 +7,15 @@
 #include <boost/shared_ptr.hpp>
 using namespace boost;
 
-#include "board_channel.h"
-#include "board_message.h"
+class BoardChannel;
+class BoardMessage;
+class Connector;
 
 class Board : public QObject
 {
     Q_OBJECT
 public:
-    explicit Board(QObject *parent = 0);
+    explicit Board(Connector *conn);
     inline QList<shared_ptr<BoardChannel> > channels()
     {
         return _channels.values();
@@ -31,16 +32,6 @@ public:
 signals:
     void channelsUpdated();
     void messagesUpdated();
-
-    // === Forwarding Board slots === //
-    void doAddMessage(int channelId,
-                      QString text, int actualityDays);
-    void doAddReply(int messageId, QString text);
-    void doEditMessage(int messageId,
-                       QString text, int actualityDays);
-    void doDeleteMessage(int messageId);
-    void doUpMessage(int messageId);
-    // === ********************** === //
 
 public slots:
     void addMessage(int channelId,
@@ -59,6 +50,7 @@ private:
     void rebuildMessagesTree();
 
 private:
+    Connector *parent;
     QMap<int, shared_ptr<BoardChannel> > _channels;
     QMap<int, shared_ptr<BoardMessage> > _messages;
 };

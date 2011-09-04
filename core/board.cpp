@@ -1,7 +1,10 @@
 #include "board.h"
+#include "connector.h"
+#include "board_channel.h"
+#include "board_message.h"
 
-Board::Board(QObject *parent) :
-    QObject(parent)
+Board::Board(Connector *conn)
+  : QObject(conn), parent(conn)
 {
 }
 
@@ -57,26 +60,26 @@ void Board::rebuildMessagesTree()
 void Board::addMessage(int channelId,
                        QString text, int actualityDays)
 {
-    emit doAddMessage(channelId, text, actualityDays);
+    parent->boardAddMessage(channelId, text, actualityDays);
 }
 
 void Board::addReply(int messageId, QString text)
 {
-    emit doAddReply(messageId, text);
+    parent->boardAddReply(messageId, text);
 }
 
 void Board::editMessage(int messageId,
                         QString text, int actualityDays)
 {
-    emit doEditMessage(messageId, text, actualityDays);
+    parent->boardEditMessage(messageId, text, actualityDays);
 }
 
 void Board::deleteMessage(int messageId)
 {
-    emit doDeleteMessage(messageId);
+    parent->boardDeleteMessage(messageId);
 }
 
 void Board::upMessage(int messageId)
 {
-    emit doUpMessage(messageId);
+    parent->boardUpMessage(messageId);
 }

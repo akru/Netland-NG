@@ -1,12 +1,16 @@
 #ifndef CHAT_USER_H
 #define CHAT_USER_H
 
-#include <QString>
+#include <QObject>
 
-class ChatUser
+class Connector;
+
+class ChatUser : public QObject
 {
+  Q_OBJECT
 public:
-    explicit ChatUser(QString channelId, QString id, QString nick,
+    explicit ChatUser(Connector *conn,
+                      QString channelId, QString id, QString nick,
                       QString ip, QString computerName);
     inline QString id()
     {
@@ -30,6 +34,7 @@ public:
     }
 
 private:
+    Connector *_conn;
     QString _channel_id, _id, _nick, _ip, _computer_name;
 
 };

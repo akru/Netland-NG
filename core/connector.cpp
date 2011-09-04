@@ -1,5 +1,6 @@
 #include "connector.h"
-
+#include "board.h"
+#include "chat.h"
 #include <QHostAddress>
 
 Connector::Connector(QObject *parent) :
@@ -20,17 +21,6 @@ void Connector::connectAll()
             _board, SLOT(updateMessages(QMap<int,shared_ptr<BoardMessage> >)));
     connect(this, SIGNAL(boardNewMessages()),
             this, SLOT(boardUpdateMessages()));
-
-    connect(_board, SIGNAL(doAddMessage(int,QString,int)),
-            this, SLOT(boardAddMessage(int,QString,int)));
-    connect(_board, SIGNAL(doAddReply(int,QString)),
-            this, SLOT(boardAddReply(int,QString)));
-    connect(_board, SIGNAL(doEditMessage(int,QString,int)),
-            this, SLOT(boardEditMessage(int,QString,int)));
-    connect(_board, SIGNAL(doDeleteMessage(int)),
-            this, SLOT(boardDeleteMessage(int)));
-    connect(_board, SIGNAL(doUpMessage(int)),
-            this, SLOT(boardUpMessage(int)));
 
     // === Chat functional  === //
     connect(this, SIGNAL(nickIsSet()), this, SLOT(chatSetNick()));

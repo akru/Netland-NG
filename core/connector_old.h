@@ -1,9 +1,8 @@
 #ifndef CONNECTOR_OLD_H
 #define CONNECTOR_OLD_H
 
-#include "connector.h"
-
 #include <QTextCodec>
+#include "connector.h"
 
 class ConnectorOld :
         public Connector
@@ -16,6 +15,21 @@ signals:
     void readStringReady(QByteArray recv);
     void authStringReady(QString authStr);
     void authRequestRecv(QString req);
+
+public slots:
+    // === Board              === //
+    void boardUpdateMessages();
+    void boardAddMessage(int channelId,
+                         QString text, int actualityDays);
+    void boardAddReply(int messageId, QString text);
+    void boardEditMessage(int messageId,
+                          QString text, int actualityDays);
+    void boardDeleteMessage(int messageId);
+    void boardUpMessage(int messageId);
+
+    // === Chat               === //
+    void chatSetNick();
+    void chatUpdateUsers();
 
 private:
     void connectAll();
@@ -40,26 +54,11 @@ private:
 
     int actualityDaysConvert(int actualityDays);
 
-
 private slots:
     // === Common             === //
     void readString();
     void stringParser(QByteArray recv);
     void authStringProcessing(QString req);
-
-    // === Board              === //
-    void boardUpdateMessages();
-    void boardAddMessage(int channelId,
-                         QString text, int actualityDays);
-    void boardAddReply(int messageId, QString text);
-    void boardEditMessage(int messageId,
-                          QString text, int actualityDays);
-    void boardDeleteMessage(int messageId);
-    void boardUpMessage(int messageId);
-
-    // === Chat               === //
-    void chatSetNick();
-    void chatUpdateUsers();
 
 private:
     QTextCodec *codec;

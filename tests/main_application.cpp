@@ -1,8 +1,10 @@
 #include "main_application.h"
 
 #include <connector_old.h>
+#include <board.h>
 #include <board_channel.h>
 #include <board_message.h>
+#include <chat.h>
 #include <chat_channel.h>
 #include <chat_user.h>
 
@@ -47,8 +49,8 @@ void MainApplication::testViewChannels()
 {
     qDebug() << "View board channels:";
 
-    QList<shared_ptr<BoardChannel>> channels = conn->getBoardInstance()->channels();
-    QList<shared_ptr<BoardChannel>>::const_iterator it;
+    QList<shared_ptr<BoardChannel> > channels = conn->getBoardInstance()->channels();
+    QList<shared_ptr<BoardChannel> >::const_iterator it;
     for (it = channels.constBegin();
          it != channels.constEnd(); ++it)
     {

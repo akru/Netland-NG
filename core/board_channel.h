@@ -3,28 +3,34 @@
 
 #include <QObject>
 
+class Connector;
+
 class BoardChannel : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit BoardChannel(int id, QString name, QString description);
-    inline int id()
-    {
-        return _id;
-    }
-    inline QString name()
-    {
-        return _name;
-    }
-    inline QString description()
-    {
-        return _description;
-    }
+  explicit BoardChannel(Connector *conn,
+                        int id, QString name, QString description);
+  inline int id()
+  {
+    return _id;
+  }
+  inline QString name()
+  {
+    return _name;
+  }
+  inline QString description()
+  {
+    return _description;
+  }
+
+public slots:
+  void addMessage(QString text, int actualityDays = 30);
 
 private:
-    int _id;
-    QString _name, _description;
-
+  Connector *_conn;
+  int _id;
+  QString _name, _description;
 };
 
 #endif // BOARD_CHANNEL_H

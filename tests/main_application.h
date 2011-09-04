@@ -3,7 +3,11 @@
 
 #include <QtCore/QCoreApplication>
 
-#include <connector.h>
+#include <boost/shared_ptr.hpp>
+using namespace boost;
+
+class Connector;
+class ChatUser;
 
 class MainApplication : public QCoreApplication
 {

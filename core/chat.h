@@ -7,8 +7,8 @@
 #include <boost/shared_ptr.hpp>
 using namespace boost;
 
-#include "chat_channel.h"
-#include "chat_user.h"
+class ChatChannel;
+class ChatUser;
 
 class Chat : public QObject
 {

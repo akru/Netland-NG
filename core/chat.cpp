@@ -1,4 +1,6 @@
 #include "chat.h"
+#include "chat_channel.h"
+#include "chat_user.h"
 
 Chat::Chat(QObject *parent) :
     QObject(parent)

@@ -1,16 +1,20 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include "board.h"
-#include "chat.h"
-#include "chat_private.h"
-
-#include <QDateTime>
 #include <QTcpSocket>
 #include <QMap>
 
 #include <boost/shared_ptr.hpp>
 using namespace boost;
+
+class QDateTime;
+class Board;
+class Chat;
+class BoardChannel;
+class BoardMessage;
+class ChatChannel;
+class ChatUser;
+class ChatPrivate;
 
 class Connector : public QTcpSocket
 {
@@ -30,6 +34,20 @@ public slots:
     // === Common          === //
     void setNick(QString nick);
     void connectToServer(QString address, QString port);
+
+    // === Board           === //
+    virtual void boardUpdateMessages() = 0;
+    virtual void boardAddMessage(int channelId,
+                                 QString text, int actualityDays) = 0;
+    virtual void boardAddReply(int messageId, QString text) = 0;
+    virtual void boardEditMessage(int messageId,
+                                  QString text, int actualityDays) = 0;
+    virtual void boardDeleteMessage(int messageId) = 0;
+    virtual void boardUpMessage(int messageId) = 0;
+
+    // === Chat            === //
+    virtual void chatSetNick() = 0;
+    virtual void chatUpdateUsers() = 0;
 
 signals:
     // === Authentification === //
@@ -59,19 +77,6 @@ protected:
 
 private:
     void connectAll();
-
-private slots:
-    virtual void boardUpdateMessages() = 0;
-    virtual void boardAddMessage(int channelId,
-                                 QString text, int actualityDays) = 0;
-    virtual void boardAddReply(int messageId, QString text) = 0;
-    virtual void boardEditMessage(int messageId,
-                                  QString text, int actualityDays) = 0;
-    virtual void boardDeleteMessage(int messageId) = 0;
-    virtual void boardUpMessage(int messageId) = 0;
-
-    virtual void chatSetNick() = 0;
-    virtual void chatUpdateUsers() = 0;
 
 private:
     Board *_board;

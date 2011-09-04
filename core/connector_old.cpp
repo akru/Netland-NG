@@ -1,6 +1,13 @@
 #include "connector_old.h"
 #include "encode.h"
-
+#include "board.h"
+#include "board_channel.h"
+#include "board_message.h"
+#include "chat.h"
+#include "chat_channel.h"
+#include "chat_user.h"
+#include "chat_private.h"
+#include <QDateTime>
 #include <QHostInfo>
 #include <QStringList>
 
@@ -201,6 +208,7 @@ CHANNEL_PROPERTIES = (("id", int_decoder),
         QStringList channel = (*it).split('\t');
         shared_ptr<BoardChannel> ch(
                     new BoardChannel(
+                        this,
                         channel.at(0).toInt(),
                         channel.at(1).mid(1),
                         channel.at(2)));
@@ -240,6 +248,7 @@ MESSAGE_PROPERTIES = (
         QDateTime millenium(QDate(1999,12,31), QTime(23,00));  // Really?
         shared_ptr<BoardMessage> msg(
             new BoardMessage(
+                    this,
                     message.at(0).toInt(),
                     message.at(2).toInt(),
                     message.at(9).toInt(),
@@ -272,6 +281,7 @@ ConnectorOld::parseChatChannels(QString recvMessage)
         QStringList channel = (*it).split('\t');
         shared_ptr<ChatChannel> ch(
                     new ChatChannel(
+                        this,
                         channel.at(0),
                         channel.at(1)));
         channels.insert(ch->id(), ch);
@@ -295,6 +305,7 @@ ConnectorOld::parseChatUsers(QStringList recvMessage)
         QStringList user = (*it).split('\t');
         shared_ptr<ChatUser> us(
             new ChatUser(
+                        this,
                         channelId,
                         user.at(0),
                         user.at(1),
@@ -311,6 +322,7 @@ ConnectorOld::parseEnteredUser(QString recvMessage)
     QStringList user = recvMessage.split("\t");
     shared_ptr<ChatUser> us(
             new ChatUser(
+                this,
                 user.at(0),
                 user.at(2),
                 user.at(3),
@@ -322,7 +334,7 @@ ConnectorOld::parseEnteredUser(QString recvMessage)
 ChatPrivate *
 ConnectorOld::parseChatPrivate(QString recvMessage)
 {
-    qDebug() << recvMessage.at(0);
+    qDebug() << recvMessage;
     return new ChatPrivate("", "", "");
 }
 

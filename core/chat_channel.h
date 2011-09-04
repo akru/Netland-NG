@@ -7,13 +7,15 @@
 #include <boost/shared_ptr.hpp>
 using namespace boost;
 
-#include "chat_user.h"
+class Connector;
+class ChatUser;
 
 class ChatChannel : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit ChatChannel(QString id, QString name);
+    explicit ChatChannel(Connector *con,
+                         QString id, QString name);
     inline QString id()
     {
         return _id;
@@ -30,15 +32,12 @@ public:
     {
         return shared_ptr<ChatUser>(_users[id]);
     }
-
-signals:
-
-public slots:
     void updateUsers(QMap<QString, shared_ptr<ChatUser> > users);
     void insertUser(shared_ptr<ChatUser> user);
     void removeUser(QString userId);
 
 private:
+    Connector *_conn;
     QString _id, _name;
     QMap<QString, shared_ptr<ChatUser> > _users;
 };

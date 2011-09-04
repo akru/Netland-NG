@@ -5,8 +5,6 @@
 
 #include "encode.h"
 
-#include <QString>
-
 Encode::Encode(QString req, int hash) :
         reply(req.toAscii())
 {
