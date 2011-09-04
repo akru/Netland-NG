@@ -20,13 +20,13 @@ signals:
 private:
     void connectAll();
 
-    QMap<int, shared_ptr<BoardChannel>>
+    QMap<int, shared_ptr<BoardChannel> >
     parseBoardChannels(QString recvMessage);
 
-    QMap<int, shared_ptr<BoardMessage>>
+    QMap<int, shared_ptr<BoardMessage> >
     parseBoardMessages(QString recvMessage);
 
-    QMap<QString, shared_ptr<ChatChannel>>
+    QMap<QString, shared_ptr<ChatChannel> >
     parseChatChannels(QString recvMessage);
 
     QMap<QString, shared_ptr<ChatUser> >
@@ -42,10 +42,12 @@ private:
 
 
 private slots:
+    // === Common             === //
     void readString();
     void stringParser(QByteArray recv);
     void authStringProcessing(QString req);
 
+    // === Board              === //
     void boardUpdateMessages();
     void boardAddMessage(int channelId,
                          QString text, int actualityDays);
@@ -55,6 +57,7 @@ private slots:
     void boardDeleteMessage(int messageId);
     void boardUpMessage(int messageId);
 
+    // === Chat               === //
     void chatSetNick();
     void chatUpdateUsers();
 
@@ -63,6 +66,7 @@ private:
     int lastTimeId;
     QByteArray recvBuffer;
 
+    // TODO: Read this constants from .config file
     static const char* version;
     static const int hash = 0x02d45b64;
 };

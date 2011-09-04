@@ -11,15 +11,16 @@ Connector::Connector(QObject *parent) :
 
 void Connector::connectAll()
 {
-    // Board functional
-    connect(this, SIGNAL(boardChannelsRecv(QMap<int, shared_ptr<BoardChannel>>)),
-            _board, SLOT(updateChannels(QMap<int,shared_ptr<BoardChannel>>)));
+    // === Board functional === //
+    connect(this, SIGNAL(boardChannelsRecv(QMap<int, shared_ptr<BoardChannel> >)),
+            _board, SLOT(updateChannels(QMap<int,shared_ptr<BoardChannel> >)));
     connect(_board, SIGNAL(channelsUpdated()),
             this, SLOT(boardUpdateMessages()));
-    connect(this, SIGNAL(boardMessagesRecv(QMap<int,shared_ptr<BoardMessage>>)),
-            _board, SLOT(updateMessages(QMap<int,shared_ptr<BoardMessage>>)));
+    connect(this, SIGNAL(boardMessagesRecv(QMap<int,shared_ptr<BoardMessage> >)),
+            _board, SLOT(updateMessages(QMap<int,shared_ptr<BoardMessage> >)));
     connect(this, SIGNAL(boardNewMessages()),
             this, SLOT(boardUpdateMessages()));
+
     connect(_board, SIGNAL(doAddMessage(int,QString,int)),
             this, SLOT(boardAddMessage(int,QString,int)));
     connect(_board, SIGNAL(doAddReply(int,QString)),
@@ -30,14 +31,15 @@ void Connector::connectAll()
             this, SLOT(boardDeleteMessage(int)));
     connect(_board, SIGNAL(doUpMessage(int)),
             this, SLOT(boardUpMessage(int)));
-    // Chat functional
+
+    // === Chat functional  === //
     connect(this, SIGNAL(nickIsSet()), this, SLOT(chatSetNick()));
-    connect(this, SIGNAL(chatChannelsRecv(QMap<QString,shared_ptr<ChatChannel>>)),
-            _chat, SLOT(updateChannels(QMap<QString,shared_ptr<ChatChannel>>)));
+    connect(this, SIGNAL(chatChannelsRecv(QMap<QString,shared_ptr<ChatChannel> >)),
+            _chat, SLOT(updateChannels(QMap<QString,shared_ptr<ChatChannel> >)));
     connect(_chat, SIGNAL(channelsUpdated()),
             this, SLOT(chatUpdateUsers()));
-    connect(this, SIGNAL(chatUsersRecv(QString,QMap<QString, shared_ptr<ChatUser>>)),
-            _chat, SLOT(updateUsers(QString,QMap<QString,shared_ptr<ChatUser>>)));
+    connect(this, SIGNAL(chatUsersRecv(QString,QMap<QString, shared_ptr<ChatUser> >)),
+            _chat, SLOT(updateUsers(QString,QMap<QString,shared_ptr<ChatUser> >)));
     connect(this, SIGNAL(chatUserEnter(QString,shared_ptr<ChatUser>)),
             _chat, SLOT(insertUser(QString,shared_ptr<ChatUser>)));
     connect(this, SIGNAL(chatUserLeave(QString,QString)),

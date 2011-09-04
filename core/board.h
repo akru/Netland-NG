@@ -15,8 +15,7 @@ class Board : public QObject
     Q_OBJECT
 public:
     explicit Board(QObject *parent = 0);
-    ~Board();
-    inline QList<shared_ptr<BoardChannel>> channels()
+    inline QList<shared_ptr<BoardChannel> > channels()
     {
         return _channels.values();
     }
@@ -33,6 +32,7 @@ signals:
     void channelsUpdated();
     void messagesUpdated();
 
+    // === Forwarding Board slots === //
     void doAddMessage(int channelId,
                       QString text, int actualityDays);
     void doAddReply(int messageId, QString text);
@@ -40,6 +40,7 @@ signals:
                        QString text, int actualityDays);
     void doDeleteMessage(int messageId);
     void doUpMessage(int messageId);
+    // === ********************** === //
 
 public slots:
     void addMessage(int channelId,
@@ -51,15 +52,15 @@ public slots:
     void upMessage(int messageId);
 
 private slots:
-    void updateChannels(QMap<int, shared_ptr<BoardChannel>> channels);
-    void updateMessages(QMap<int, shared_ptr<BoardMessage>> messages);
+    void updateChannels(QMap<int, shared_ptr<BoardChannel> > channels);
+    void updateMessages(QMap<int, shared_ptr<BoardMessage> > messages);
 
 private:
     void rebuildMessagesTree();
 
 private:
-    QMap<int, shared_ptr<BoardChannel>> _channels;
-    QMap<int, shared_ptr<BoardMessage>> _messages;
+    QMap<int, shared_ptr<BoardChannel> > _channels;
+    QMap<int, shared_ptr<BoardMessage> > _messages;
 };
 
 #endif // BOARD_H

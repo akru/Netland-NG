@@ -22,7 +22,7 @@ public:
     {
         return _name;
     }
-    inline QList<shared_ptr<ChatUser>> users()
+    inline QList<shared_ptr<ChatUser> > users()
     {
         return _users.values();
     }
@@ -34,13 +34,13 @@ public:
 signals:
 
 public slots:
-    void updateUsers(QMap<QString, shared_ptr<ChatUser>> users);
+    void updateUsers(QMap<QString, shared_ptr<ChatUser> > users);
     void insertUser(shared_ptr<ChatUser> user);
     void removeUser(QString userId);
 
 private:
     QString _id, _name;
-    QMap<QString, shared_ptr<ChatUser>> _users;
+    QMap<QString, shared_ptr<ChatUser> > _users;
 };
 
 #endif // CHAT_CHANNEL_H

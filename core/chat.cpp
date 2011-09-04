@@ -5,7 +5,7 @@ Chat::Chat(QObject *parent) :
 {
 }
 
-void Chat::updateChannels(QMap<QString, shared_ptr<ChatChannel>> channels)
+void Chat::updateChannels(QMap<QString, shared_ptr<ChatChannel> > channels)
 {
     _channels = channels;
     emit channelsUpdated();

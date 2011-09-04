@@ -12,8 +12,7 @@
 #include <boost/shared_ptr.hpp>
 using namespace boost;
 
-class Connector :
-        public QTcpSocket
+class Connector : public QTcpSocket
 {
     Q_OBJECT
 public:
@@ -28,21 +27,32 @@ public:
     }
 
 public slots:
+    // === Common          === //
     void setNick(QString nick);
     void connectToServer(QString address, QString port);
 
 signals:
+    // === Authentification === //
     void authSuccess();
+
+    // === Information      === //
     void infoMessage(QString msg);
-    void boardChannelsRecv(QMap<int, shared_ptr<BoardChannel>> channels);
-    void boardMessagesRecv(QMap<int, shared_ptr<BoardMessage>> messages);
+
+    // === Board            === //
+    void boardChannelsRecv(QMap<int, shared_ptr<BoardChannel> > channels);
+    void boardMessagesRecv(QMap<int, shared_ptr<BoardMessage> > messages);
     void boardNewMessages();
-    void nickIsSet();
-    void chatChannelsRecv(QMap<QString, shared_ptr<ChatChannel>> channels);
-    void chatUsersRecv(QString channelId, QMap<QString, shared_ptr<ChatUser>> users);
+
+    // === Chat             === //
+    void chatChannelsRecv(QMap<QString, shared_ptr<ChatChannel> > channels);
+    void chatUsersRecv(QString channelId,
+                       QMap<QString, shared_ptr<ChatUser> > users);
     void chatUserEnter(QString channelId, shared_ptr<ChatUser> user);
     void chatUserLeave(QString channelId, QString userId);
     void chatPrivateMessage(ChatPrivate *message);
+
+    // === Common           === //
+    void nickIsSet();
 
 protected:
     QString _nick;
@@ -59,6 +69,7 @@ private slots:
                                   QString text, int actualityDays) = 0;
     virtual void boardDeleteMessage(int messageId) = 0;
     virtual void boardUpMessage(int messageId) = 0;
+
     virtual void chatSetNick() = 0;
     virtual void chatUpdateUsers() = 0;
 

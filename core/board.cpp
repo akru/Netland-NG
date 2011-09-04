@@ -5,11 +5,7 @@ Board::Board(QObject *parent) :
 {
 }
 
-Board::~Board()
-{
-}
-
-void Board::updateChannels(QMap<int, shared_ptr<BoardChannel>> channels)
+void Board::updateChannels(QMap<int, shared_ptr<BoardChannel> > channels)
 {
     if (!_channels.isEmpty())
     {
@@ -25,7 +21,7 @@ void Board::updateChannels(QMap<int, shared_ptr<BoardChannel>> channels)
     emit channelsUpdated();
 }
 
-void Board::updateMessages(QMap<int, shared_ptr<BoardMessage>> messages)
+void Board::updateMessages(QMap<int, shared_ptr<BoardMessage> > messages)
 {
     if (!_messages.isEmpty())
     {
@@ -45,8 +41,8 @@ void Board::rebuildMessagesTree()
 {
     if (!_messages.isEmpty())
     {
-        QList<shared_ptr<BoardMessage>> msg = _messages.values();
-        QList<shared_ptr<BoardMessage>>::const_iterator it;
+        QList<shared_ptr<BoardMessage> > msg = _messages.values();
+        QList<shared_ptr<BoardMessage> >::const_iterator it;
         for (it = msg.constBegin();
              it != msg.constEnd(); ++it)
         {

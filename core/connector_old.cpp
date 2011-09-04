@@ -10,14 +10,14 @@ const char * ConnectorOld::version = "v8.6";
 
 ConnectorOld::ConnectorOld(QObject *parent)
     : Connector(parent),
-      codec(QTextCodec::codecForName("cp-1251")), // All messages from this server encoded in WINDOWS-CP1251
+      // All messages from this server encoded in WINDOWS-CP1251
+      codec(QTextCodec::codecForName("cp-1251")),
       lastTimeId(0)
 {
     connectAll();
 }
 
-void
-ConnectorOld::connectAll()
+void ConnectorOld::connectAll()
 {
     connect(this, SIGNAL(readyRead()),
             this, SLOT(readString()));
@@ -28,8 +28,7 @@ ConnectorOld::connectAll()
             this, SLOT(authStringProcessing(QString)));
 }
 
-void
-ConnectorOld::readString()
+void ConnectorOld::readString()
 {
     recvBuffer += readAll();
     if (recvBuffer.split('\n').count() == 1)    // Verify for not full message
@@ -45,8 +44,7 @@ ConnectorOld::readString()
     }
 }
 
-void
-ConnectorOld::stringParser(QByteArray recv)
+void ConnectorOld::stringParser(QByteArray recv)
 {
     QString recvStr = codec->toUnicode(recv);
     QChar category = recvStr[0];                        // First symbol of string
@@ -55,10 +53,11 @@ ConnectorOld::stringParser(QByteArray recv)
     switch (category.toAscii())
     {
     case 'R':       // Authentification request
+        qDebug() << "CONN :: Auth_req:" << message;
         emit authRequestRecv(message.at(0));
-        qDebug() << "Auth_r :: " << message;
         break;
     case 'b':       // Information
+        qDebug() << "CONN :: Inform:" << message;
         emit infoMessage(message.at(0));
         if (message.at(0).split(" ").count() == 7)
         {
@@ -67,12 +66,12 @@ ConnectorOld::stringParser(QByteArray recv)
                 emit authSuccess();
             }
         }
-        qDebug() << "Inform :: " << message;
         break;
     case 'd':       // Board
         cmd = message.at(0);
         if (cmd == "channels")  // Receved channel list
         {
+            qDebug() << "CONN :: Board: channels recv";
             message.pop_front();    // Remove command from message
             emit boardChannelsRecv(parseBoardChannels(message.join("\t")));
         }
@@ -80,40 +79,44 @@ ConnectorOld::stringParser(QByteArray recv)
         {
             if (cmd == "new")  // New messages
             {
-                qDebug() << "CONN :: new messages avaible";
+                qDebug() << "CONN :: Board: new messages avaible";
                 emit boardNewMessages();
             }
             else
             {
                 if (cmd == "skins")
                 {
+                    qDebug() << "CONN :: Board: \"skins\" cmd recv";
                 }
                 else
                 {
                     if (cmd == "admin")
                     {
+                        qDebug() << "CONN :: Board: \"admin\" cmd recv";
                     }
                     else
                     {
+                        qDebug() << "CONN :: Board: messages recv";
                         emit boardMessagesRecv(
                                     parseBoardMessages(message.join("\t")));
                     }
                 }
             }
         }
-        //qDebug() << "DBoard :: " << message;
+//        qDebug() << "DBoard :: " << message;
         break;
     case 'c':       // Chat
         cmd = message.at(0);
         message.pop_front();    // Remove command from message
         if (cmd == "main")
         {
-
+            qDebug() << "CONN :: Chat: \"main\" cmd recv";
         }
         else
         {
             if (cmd == "enter")
             {
+                qDebug() << "CONN :: Chat: new user entered";
                 QString channelId = message.at(0);
                 if (getChatInstance()->getChannel(channelId))
                     emit chatUserEnter(
@@ -124,8 +127,9 @@ ConnectorOld::stringParser(QByteArray recv)
             {
                 if (cmd == "leave")
                 {
+                    qDebug() << "CONN :: Chat: user leave";
                     QString channelId = message.at(0);
-                    if (getChatInstance()->getChannel(channelId))
+                    if (getChatInstance()->getChannel(channelId) != NULL)
                         if (getChatInstance()->
                                 getChannel(channelId)->
                                     getUser(message.at(2)) != NULL)
@@ -137,7 +141,7 @@ ConnectorOld::stringParser(QByteArray recv)
                 {
                     if (cmd == "private")
                     {
-//                        message.pop_front();    // Remove command from message
+                        qDebug() << "CONN :: Chat: new private message";
                         emit chatPrivateMessage(
                                     parseChatPrivate(message.join("\t")));
                     }
@@ -145,13 +149,13 @@ ConnectorOld::stringParser(QByteArray recv)
                     {
                         if (cmd == "infoGet")
                         {
-
+                            qDebug() << "CONN :: Chat: \"infoGet\" cmd recv";
                         }
                         else
                         {
                             if (cmd == "channels")
                             {
-//                                message.pop_front();    // Remove command from message
+                                qDebug() << "CONN :: Chat: channels recv";
                                 emit chatChannelsRecv(
                                             parseChatChannels(
                                                 message.join("\t")));
@@ -160,6 +164,7 @@ ConnectorOld::stringParser(QByteArray recv)
                             {
                                 if (cmd == "userlist")
                                 {
+                                    qDebug() << "CONN :: Chat: userlist recv";
                                     emit chatUsersRecv(
                                                 message.at(0),
                                                 parseChatUsers(message));
@@ -177,10 +182,10 @@ ConnectorOld::stringParser(QByteArray recv)
     }
 }
 
-QMap<int, shared_ptr<BoardChannel>>
+QMap<int, shared_ptr<BoardChannel> >
 ConnectorOld::parseBoardChannels(QString recvMessage)
 {
-    QMap<int, shared_ptr<BoardChannel>> channels;
+    QMap<int, shared_ptr<BoardChannel> > channels;
     /*
       Thanks Assaron
 
@@ -204,10 +209,10 @@ CHANNEL_PROPERTIES = (("id", int_decoder),
     return channels;
 }
 
-QMap<int, shared_ptr<BoardMessage>>
+QMap<int, shared_ptr<BoardMessage> >
 ConnectorOld::parseBoardMessages(QString recvMessage)
 {
-    QMap<int, shared_ptr<BoardMessage>> messages;
+    QMap<int, shared_ptr<BoardMessage> > messages;
     /*
       Thanks Assaron
 
@@ -255,10 +260,10 @@ MESSAGE_PROPERTIES = (
     return messages;
 }
 
-QMap<QString, shared_ptr<ChatChannel>>
+QMap<QString, shared_ptr<ChatChannel> >
 ConnectorOld::parseChatChannels(QString recvMessage)
 {
-    QMap<QString, shared_ptr<ChatChannel>> channels;
+    QMap<QString, shared_ptr<ChatChannel> > channels;
     QStringList channelsList = recvMessage.split("\r");
     channelsList.pop_back(); // Remove empty string
     for (QStringList::const_iterator it = channelsList.constBegin();
@@ -274,7 +279,7 @@ ConnectorOld::parseChatChannels(QString recvMessage)
     return channels;
 }
 
-QMap<QString, shared_ptr<ChatUser>>
+QMap<QString, shared_ptr<ChatUser> >
 ConnectorOld::parseChatUsers(QStringList recvMessage)
 {
     QMap<QString, shared_ptr<ChatUser> > users;
@@ -331,16 +336,14 @@ void ConnectorOld::authStringProcessing(QString req)
     write(authString);
 }
 
-void
-ConnectorOld::boardUpdateMessages()
+void ConnectorOld::boardUpdateMessages()
 {
     QByteArray req = "Dlast\t" +
             QString::number(lastTimeId).toAscii() + "\t\n";
     write(req);
 }
 
-void
-ConnectorOld::boardAddMessage(int channelId, QString text, int actualityDays)
+void ConnectorOld::boardAddMessage(int channelId, QString text, int actualityDays)
 {
     QByteArray req = "Dadd\t" + QString::number(channelId).toAscii() +
             "\t" + QString::number(actualityDaysConvert(actualityDays)).toAscii() +
@@ -349,8 +352,7 @@ ConnectorOld::boardAddMessage(int channelId, QString text, int actualityDays)
     write(req);
 }
 
-void
-ConnectorOld::boardAddReply(int messageId, QString text)
+void ConnectorOld::boardAddReply(int messageId, QString text)
 {
     QByteArray req = "Dreply\t" + QString::number(messageId).toAscii() +
             "\t" + codec->fromUnicode(_nick) + "\t" +
@@ -358,8 +360,7 @@ ConnectorOld::boardAddReply(int messageId, QString text)
     write(req);
 }
 
-void
-ConnectorOld::boardEditMessage(int messageId, QString text, int actualityDays)
+void ConnectorOld::boardEditMessage(int messageId, QString text, int actualityDays)
 {
     shared_ptr<BoardMessage> msg = getBoardInstance()->getMessage(messageId);
     QByteArray req = "Dedit\t" + QString::number(messageId).toAscii() +
@@ -371,37 +372,32 @@ ConnectorOld::boardEditMessage(int messageId, QString text, int actualityDays)
     write(req);
 }
 
-void
-ConnectorOld::boardDeleteMessage(int messageId)
+void ConnectorOld::boardDeleteMessage(int messageId)
 {
     QByteArray req = "Ddel\t" + QString::number(messageId).toAscii() +
             "\t" + codec->fromUnicode(_nick) + "\t\t\n";
     write(req);
 }
 
-void
-ConnectorOld::boardUpMessage(int messageId)
+void ConnectorOld::boardUpMessage(int messageId)
 {
     QByteArray req = "Dup\t" + QString::number(messageId).toAscii() + "\n";
     write(req);
 }
 
-int
-ConnectorOld::actualityDaysConvert(int actualityDays)
+int ConnectorOld::actualityDaysConvert(int actualityDays)
 {
     QDate today = QDate::currentDate();
     return QDate(1899, 12, 30).daysTo(today.addDays(actualityDays));
 }
 
-void
-ConnectorOld::chatSetNick()
+void ConnectorOld::chatSetNick()
 {
     QByteArray nickSetStr = "cnik\t" + _nick.toAscii() + "\n";
     write(nickSetStr);
 }
 
-void
-ConnectorOld::chatUpdateUsers()
+void ConnectorOld::chatUpdateUsers()
 {
     write("cUserList\n");
 }
