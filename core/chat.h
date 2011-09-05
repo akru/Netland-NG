@@ -9,6 +9,7 @@ using namespace boost;
 
 class ChatChannel;
 class ChatUser;
+class ChatPrivate;
 
 class Chat : public QObject
 {
@@ -26,25 +27,13 @@ public:
 
 signals:
     void channelsUpdated();
-    void usersUpdated(QString channelId);
-    void userConnected(shared_ptr<ChatUser> user);
-    void userDisconnected(shared_ptr<ChatUser> user);
-
 public slots:
-
-private:
-    void connectChannels();
 
 private slots:
     void updateChannels(QMap<QString, shared_ptr<ChatChannel> > channels);
-    void updateUsers(QString channelId,
-                     QMap<QString, shared_ptr<ChatUser> > users);
-    void insertUser(QString channelId, shared_ptr<ChatUser> user);
-    void removeUser(QString channelId, QString userId);
 
 private:
     QMap<QString, shared_ptr<ChatChannel> > _channels;
-
 };
 
 #endif // CHAT_H

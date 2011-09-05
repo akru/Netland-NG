@@ -7,6 +7,7 @@
 #include <chat.h>
 #include <chat_channel.h>
 #include <chat_user.h>
+#include <chat_private.h>
 
 MainApplication::MainApplication(int argc, char *argv[])
     : QCoreApplication(argc, argv),
@@ -26,15 +27,13 @@ void MainApplication::connectAll()
     connect(conn, SIGNAL(authSuccess()),
             this, SLOT(testAuthentification()));
     connect(conn->getBoardInstance(), SIGNAL(channelsUpdated()),
-            this, SLOT(testViewChannels()));
+            this, SLOT(testBoardViewChannels()));
     connect(conn->getBoardInstance(), SIGNAL(messagesUpdated()),
-            this, SLOT(testViewMessages()));
-    connect(conn->getChatInstance(), SIGNAL(usersUpdated(QString)),
-            this, SLOT(testViewChat(QString)));
-    connect(conn->getChatInstance(), SIGNAL(userConnected(shared_ptr<ChatUser>)),
-            this, SLOT(testChatUCon(shared_ptr<ChatUser>)));
-    connect(conn->getChatInstance(), SIGNAL(userDisconnected(shared_ptr<ChatUser>)),
-            this, SLOT(testChatUDiscon(shared_ptr<ChatUser>)));
+            this, SLOT(testBoardViewMessages()));
+    connect(conn->getChatInstance(), SIGNAL(channelsUpdated()),
+            this, SLOT(testChatViewChannels()));
+    connect(conn, SIGNAL(chatPrivateMessage(shared_ptr<ChatPrivate>)),
+            this, SLOT(testChatPrivateMessage(shared_ptr<ChatPrivate>)));
 }
 
 // Tests
@@ -45,10 +44,9 @@ void MainApplication::testAuthentification()
     conn->setNick("inspier");
 }
 
-void MainApplication::testViewChannels()
+void MainApplication::testBoardViewChannels()
 {
     qDebug() << "View board channels:";
-
     QList<shared_ptr<BoardChannel> > channels = conn->getBoardInstance()->channels();
     QList<shared_ptr<BoardChannel> >::const_iterator it;
     for (it = channels.constBegin();
@@ -58,7 +56,7 @@ void MainApplication::testViewChannels()
     }
 }
 
-void MainApplication::testViewMessages()
+void MainApplication::testBoardViewMessages()
 {
     qDebug() << "View board messages:";
     shared_ptr<BoardChannel> ch = conn->getBoardInstance()->channels().at(0);
@@ -75,19 +73,51 @@ void MainApplication::testViewMessages()
     }
 }
 
-void MainApplication::testViewChat(QString channelId)
+void MainApplication::testChatViewChannels()
 {
-    shared_ptr<ChatChannel> ch = conn->getChatInstance()->getChannel(channelId);
-    qDebug() << ch->name() << "::" <<
-                    ch->users().count() << "users";
+  qDebug() << "View chat channels:";
+  QList<shared_ptr<ChatChannel> > channels =
+      conn->getChatInstance()->channels();
+  QList<shared_ptr<ChatChannel> >::const_iterator it;
+  for (it = channels.constBegin();
+       it != channels.constEnd(); ++it)
+  {
+    qDebug() << (*it)->name();
+    connect((*it).get(), SIGNAL(usersUpdated()), this, SLOT(testChatViewChannelUsers()));
+    connect((*it).get(), SIGNAL(userConnected(shared_ptr<ChatUser>)),
+            this, SLOT(testChatViewConnected(shared_ptr<ChatUser>)));
+    connect((*it).get(), SIGNAL(userDisconnected(shared_ptr<ChatUser>)),
+            this, SLOT(testChatViewDisconnected(shared_ptr<ChatUser>)));
+  }
 }
 
-void MainApplication::testChatUCon(shared_ptr<ChatUser> user)
+void MainApplication::testChatViewChannelUsers()
+{
+  QList<shared_ptr<ChatChannel> > channels =
+      conn->getChatInstance()->channels();
+  QList<shared_ptr<ChatChannel> >::const_iterator it;
+  for (it = channels.constBegin();
+       it != channels.constEnd(); ++it)
+  {
+    qDebug() << (*it)->name() << "::" <<
+                    (*it)->users().count() << "users";
+  }
+}
+
+void MainApplication::testChatViewConnected(shared_ptr<ChatUser> user)
 {
     qDebug() << "Chat:" << user->nick() << "connected";
 }
 
-void MainApplication::testChatUDiscon(shared_ptr<ChatUser> user)
+void MainApplication::testChatViewDisconnected(shared_ptr<ChatUser> user)
 {
     qDebug() << "Chat:" << user->nick() << "disconnected";
+}
+
+void MainApplication::testChatPrivateMessage(shared_ptr<ChatPrivate> msg)
+{
+  Chat *chat = conn->getChatInstance();
+  shared_ptr<ChatUser> sndr =
+      chat->getChannel(msg->channelId())->getUser(msg->senderId());
+  qDebug() << "Private:" << sndr->nick() << msg->text();
 }

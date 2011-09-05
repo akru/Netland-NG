@@ -123,18 +123,18 @@ void ConnectorOld::stringParser(QByteArray recv)
         {
             if (cmd == "enter")
             {
-                qDebug() << "CONN :: Chat: new user entered";
+                qDebug() << "CONN :: Chat: new user entered" << message;
                 QString channelId = message.at(0);
                 if (getChatInstance()->getChannel(channelId))
                     emit chatUserEnter(
                             channelId,
-                            parseEnteredUser(message.join("\t")));
+                            parseEnteredUser(message));
             }
             else
             {
                 if (cmd == "leave")
                 {
-                    qDebug() << "CONN :: Chat: user leave";
+                    qDebug() << "CONN :: Chat: user leave" << message;
                     QString channelId = message.at(0);
                     if (getChatInstance()->getChannel(channelId) != NULL)
                         if (getChatInstance()->
@@ -150,7 +150,7 @@ void ConnectorOld::stringParser(QByteArray recv)
                     {
                         qDebug() << "CONN :: Chat: new private message";
                         emit chatPrivateMessage(
-                                    parseChatPrivate(message.join("\t")));
+                              parseChatPrivate(message));
                     }
                     else
                     {
@@ -317,25 +317,29 @@ ConnectorOld::parseChatUsers(QStringList recvMessage)
 }
 
 shared_ptr<ChatUser>
-ConnectorOld::parseEnteredUser(QString recvMessage)
+ConnectorOld::parseEnteredUser(QStringList recvMessage)
 {
-    QStringList user = recvMessage.split("\t");
     shared_ptr<ChatUser> us(
             new ChatUser(
                 this,
-                user.at(0),
-                user.at(2),
-                user.at(3),
-                user.at(4),
-                user.at(5)));
+                recvMessage.at(0),
+                recvMessage.at(2),
+                recvMessage.at(3),
+                recvMessage.at(4),
+                recvMessage.at(5)));
     return us;
 }
 
-ChatPrivate *
-ConnectorOld::parseChatPrivate(QString recvMessage)
+shared_ptr<ChatPrivate>
+ConnectorOld::parseChatPrivate(QStringList recvMessage)
 {
-    qDebug() << recvMessage;
-    return new ChatPrivate("", "", "");
+  shared_ptr<ChatPrivate> cp(
+        new ChatPrivate(
+          recvMessage.at(0),
+          recvMessage.at(1),
+          "",
+          recvMessage.at(5)));
+  return cp;
 }
 
 void ConnectorOld::authStringProcessing(QString req)
@@ -405,7 +409,7 @@ int ConnectorOld::actualityDaysConvert(int actualityDays)
 
 void ConnectorOld::chatSetNick()
 {
-    QByteArray nickSetStr = "cnik\t" + _nick.toAscii() + "\n";
+    QByteArray nickSetStr = "cnik\t" + codec->fromUnicode(_nick) + "\n";
     write(nickSetStr);
 }
 

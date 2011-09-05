@@ -32,9 +32,20 @@ public:
     {
         return shared_ptr<ChatUser>(_users[id]);
     }
-    void updateUsers(QMap<QString, shared_ptr<ChatUser> > users);
-    void insertUser(shared_ptr<ChatUser> user);
-    void removeUser(QString userId);
+
+signals:
+    void usersUpdated();
+    void userConnected(shared_ptr<ChatUser> user);
+    void userDisconnected(shared_ptr<ChatUser> user);
+
+private:
+    void connectAll();
+
+private slots:
+    void updateUsers(QString channelId,
+                     QMap<QString, shared_ptr<ChatUser> > users);
+    void insertUser(QString channelId, shared_ptr<ChatUser> user);
+    void removeUser(QString channelId, QString userId);
 
 private:
     Connector *_conn;

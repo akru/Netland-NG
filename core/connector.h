@@ -67,7 +67,7 @@ signals:
                        QMap<QString, shared_ptr<ChatUser> > users);
     void chatUserEnter(QString channelId, shared_ptr<ChatUser> user);
     void chatUserLeave(QString channelId, QString userId);
-    void chatPrivateMessage(ChatPrivate *message);
+    void chatPrivateMessage(shared_ptr<ChatPrivate> message);
 
     // === Common           === //
     void nickIsSet();

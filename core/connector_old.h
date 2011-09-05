@@ -47,10 +47,10 @@ private:
     parseChatUsers(QStringList recvMessage);
 
     shared_ptr<ChatUser>
-    parseEnteredUser(QString recvMessage);
+    parseEnteredUser(QStringList recvMessage);
 
-    ChatPrivate *
-    parseChatPrivate(QString recvMessage);
+    shared_ptr<ChatPrivate>
+    parseChatPrivate(QStringList recvMessage);
 
     int actualityDaysConvert(int actualityDays);
 

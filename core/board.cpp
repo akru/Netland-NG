@@ -10,16 +10,7 @@ Board::Board(Connector *conn)
 
 void Board::updateChannels(QMap<int, shared_ptr<BoardChannel> > channels)
 {
-    if (!_channels.isEmpty())
-    {
-        QList<int> channelsId = channels.keys();
-        QList<int>::const_iterator it;
-        for (it = channelsId.constBegin();
-             it != channelsId.constEnd(); ++it)
-            _channels.insert(*it, channels[*it]);
-    }
-    else
-        _channels = channels;
+    _channels = channels;
     rebuildMessagesTree();
     emit channelsUpdated();
 }

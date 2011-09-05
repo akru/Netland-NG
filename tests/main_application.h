@@ -8,6 +8,7 @@ using namespace boost;
 
 class Connector;
 class ChatUser;
+class ChatPrivate;
 
 class MainApplication : public QCoreApplication
 {
@@ -21,11 +22,14 @@ private:
 
 public slots:
     void testAuthentification();
-    void testViewChannels();
-    void testViewMessages();
-    void testViewChat(QString channelId);
-    void testChatUCon(shared_ptr<ChatUser> user);
-    void testChatUDiscon(shared_ptr<ChatUser> user);
+
+    void testBoardViewChannels();
+    void testBoardViewMessages();
+    void testChatViewChannels();
+    void testChatViewChannelUsers();
+    void testChatViewConnected(shared_ptr<ChatUser> user);
+    void testChatViewDisconnected(shared_ptr<ChatUser> user);
+    void testChatPrivateMessage(shared_ptr<ChatPrivate> msg);
 
 private:
     Connector *conn;

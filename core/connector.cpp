@@ -28,12 +28,6 @@ void Connector::connectAll()
             _chat, SLOT(updateChannels(QMap<QString,shared_ptr<ChatChannel> >)));
     connect(_chat, SIGNAL(channelsUpdated()),
             this, SLOT(chatUpdateUsers()));
-    connect(this, SIGNAL(chatUsersRecv(QString,QMap<QString, shared_ptr<ChatUser> >)),
-            _chat, SLOT(updateUsers(QString,QMap<QString,shared_ptr<ChatUser> >)));
-    connect(this, SIGNAL(chatUserEnter(QString,shared_ptr<ChatUser>)),
-            _chat, SLOT(insertUser(QString,shared_ptr<ChatUser>)));
-    connect(this, SIGNAL(chatUserLeave(QString,QString)),
-            _chat, SLOT(removeUser(QString,QString)));
 }
 
 void Connector::setNick(QString nick)

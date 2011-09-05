@@ -4,11 +4,15 @@
 #include <QObject>
 #include <QDateTime>
 
-
 class ChatPrivate
 {
 public:
-    explicit ChatPrivate(QString senderId, QString recieverId, QString text);
+    explicit ChatPrivate(QString channelId, QString senderId,
+                         QString recieverId, QString text);
+    inline QString channelId()
+    {
+        return _channel_id;
+    }
     inline QString senderId()
     {
         return _sender_id;
@@ -27,7 +31,7 @@ public:
     }
 
 private:
-    QString _sender_id, _reciever_id, _text;
+    QString _channel_id, _sender_id, _reciever_id, _text;
     QDateTime _created;
 };
 
