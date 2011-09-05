@@ -135,22 +135,40 @@ void ConnectorOld::stringParser(QByteArray recv)
     {
       if (cmd == "enter")
       {
-        qDebug() << "CONN :: Chat: new user entered" << message;
         QString channelId = message.at(0);
-        if (getChatInstance()->getChannel(channelId) != NULL)
+        if (QHostAddress().setAddress(channelId))
+        {
+          qDebug() << "CONN :: Host entered"
+                   << message.at(2) << "@" << channelId;
+        }
+        else
+        {
+          qDebug() << "CONN :: Chat: new user entered" << message.at(3);
           emit chatUserEnter(channelId, parseEnteredUser(message));
+        }
       }
       else
       {
         if (cmd == "leave")
         {
-          qDebug() << "CONN :: Chat: user leave" << message;
           QString channelId = message.at(0);
-          shared_ptr<ChatChannel> ch =
-              getChatInstance()->getChannel(channelId);
-          if (ch != NULL)
-            if (ch->getUser(message.at(2)) != NULL)
+          if (QHostAddress().setAddress(channelId))
+          {
+            qDebug() << "CONN :: Host leave"
+                     << message.at(2) << "@" << channelId;
+          }
+          else
+          {
+            shared_ptr<ChatChannel> ch =
+                getChatInstance()->getChannel(channelId);
+            bool online; // Verify for user connect state
+            ch->getUser(message.at(2), &online);
+            if (online)
+            {
+              qDebug() << "CONN :: Chat: user leave" << message.at(3);
               emit chatUserLeave(channelId, message.at(2));
+            }
+          }
         }
         else
         {

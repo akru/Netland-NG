@@ -46,6 +46,7 @@ public:
   {
     return _channels[id];
   }
+  shared_ptr<ChatChannel> getChannel(QString id, bool *ok);
 
 signals:
   void channelsUpdated();

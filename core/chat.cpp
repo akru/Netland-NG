@@ -36,6 +36,21 @@ void Chat::connectAll()
           this, SLOT(updateChannels(QMap<QString,shared_ptr<ChatChannel> >)));
 }
 
+shared_ptr<ChatChannel>
+Chat::getChannel(QString id, bool *ok)
+{
+  if (_channels.keys().contains(id))
+  {
+    *ok = true;
+    return _channels[id];
+  }
+  else
+  {
+    *ok = false;
+    return shared_ptr<ChatChannel>();
+  }
+}
+
 void Chat::updateChannels(QMap<QString, shared_ptr<ChatChannel> > channels)
 {
   _channels = channels;

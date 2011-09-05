@@ -39,6 +39,21 @@ void ChatChannel::connectAll()
           this, SLOT(removeUser(QString,QString)));
 }
 
+shared_ptr<ChatUser>
+ChatChannel::getUser(QString id, bool *ok)
+{
+  if (_users.keys().contains(id))
+  {
+    *ok = true;
+    return _users[id];
+  }
+  else
+  {
+    *ok = false;
+    return shared_ptr<ChatUser>();
+  }
+}
+
 void ChatChannel::updateUsers(QString channelId,
                               QMap<QString, shared_ptr<ChatUser> > users)
 {

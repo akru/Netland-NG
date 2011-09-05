@@ -52,6 +52,7 @@ public:
   {
     return _users[id];
   }
+  shared_ptr<ChatUser> getUser(QString id, bool *ok);
 
 signals:
   void usersUpdated();
