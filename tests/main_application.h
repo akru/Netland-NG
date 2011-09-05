@@ -43,7 +43,6 @@ private:
 
 public slots:
   void testAuthentification();
-
   void testBoardViewChannels();
   void testBoardViewMessages();
   void testChatViewChannels();
@@ -51,6 +50,7 @@ public slots:
   void testChatViewConnected(shared_ptr<ChatUser> user);
   void testChatViewDisconnected(shared_ptr<ChatUser> user);
   void testChatPrivateMessage(shared_ptr<ChatPrivate> msg);
+  void testChatDeliveredReport(shared_ptr<ChatPrivate> msg);
 
 private:
   Connector *conn;

@@ -36,6 +36,10 @@ void ChatUser::connectAll()
 {
   connect(_conn, SIGNAL(chatPrivateMessage(shared_ptr<ChatPrivate>)),
           this, SLOT(recvPrivate(shared_ptr<ChatPrivate>)));
+  connect(this, SIGNAL(sendPrivateReady(shared_ptr<ChatPrivate>)),
+          _conn, SLOT(chatSendPrivate(shared_ptr<ChatPrivate>)));
+  connect(_conn, SIGNAL(chatPrivateDelivered(QString,QString,QString)),
+          this, SLOT(recvDeliveredReport(QString,QString,QString)));
 }
 
 void ChatUser::recvPrivate(shared_ptr<ChatPrivate> msg)
@@ -47,6 +51,26 @@ void ChatUser::recvPrivate(shared_ptr<ChatPrivate> msg)
   }
 }
 
-//void ChatUser::sendPrivate(QString text)
-//{
-//}
+void ChatUser::recvDeliveredReport(QString channelId,
+                                   QString userId, QString messageId)
+{
+  if (_channel_id == channelId && _id == userId)
+  {
+    getPrivate(messageId)->setDelivered(
+          QDateTime::currentDateTime());
+    emit privateDelivered(getPrivate(messageId));
+  }
+}
+
+void ChatUser::sendPrivate(QString text)
+{
+  shared_ptr<ChatPrivate> msg(
+        new ChatPrivate(
+          _channel_id,
+          "",
+          _id,
+          text));
+  _history.insert(msg->created(), msg);
+  _messages.insert(msg->text(), msg);
+  emit sendPrivateReady(msg);
+}

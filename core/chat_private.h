@@ -37,9 +37,9 @@ public:
   {
     return _sender_id;
   }
-  inline QString recieverId()
+  inline QString receiverId()
   {
-    return _reciever_id;
+    return _receiver_id;
   }
   inline QString text()
   {
@@ -49,10 +49,19 @@ public:
   {
     return _created;
   }
+  inline QDateTime delivered()
+  {
+    return _delivered;
+  }
+  inline void setDelivered(QDateTime delivered)
+  {
+    _delivered = delivered;
+  }
+
 
 private:
-  QString _channel_id, _sender_id, _reciever_id, _text;
-  QDateTime _created;
+  QString _channel_id, _sender_id, _receiver_id, _text;
+  QDateTime _created, _delivered;
 };
 
 #endif // CHAT_PRIVATE_H

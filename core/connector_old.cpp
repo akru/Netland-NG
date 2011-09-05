@@ -197,6 +197,16 @@ void ConnectorOld::stringParser(QByteArray recv)
                   qDebug() << "CONN :: Chat: userlist recv";
                   emit chatUsersRecv(message.at(0), parseChatUsers(message));
                 }
+                else
+                {
+                  if (cmd == "privateresived")
+                  {
+                    emit chatPrivateDelivered(
+                          message.at(0), message.at(1), message.at(2));
+                  }
+                  else
+                    qDebug() << "CONN ::" << cmd << message;
+                }
               }
             }
           }
@@ -347,12 +357,13 @@ ConnectorOld::parseEnteredUser(QStringList recvMessage)
 shared_ptr<ChatPrivate>
 ConnectorOld::parseChatPrivate(QStringList recvMessage)
 {
+  QString text = recvMessage.at(5);
   shared_ptr<ChatPrivate> cp(
         new ChatPrivate(
           recvMessage.at(0),
           recvMessage.at(1),
           "",
-          recvMessage.at(5)));
+          text.replace("\r", "\n")));
   return cp;
 }
 
@@ -431,4 +442,12 @@ void ConnectorOld::chatSetNick()
 void ConnectorOld::chatUpdateUsers()
 {
   write("cUserList\n");
+}
+
+void ConnectorOld::chatSendPrivate(shared_ptr<ChatPrivate> msg)
+{
+  QByteArray req = "cprivate\t" + msg->channelId().toAscii() +
+      "\t" + msg->receiverId().toAscii() + "\t" +
+      codec->fromUnicode(msg->text().replace("\n", "\r")) + "\n";
+  write(req);
 }

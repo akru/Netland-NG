@@ -141,4 +141,17 @@ void MainApplication::testChatPrivateMessage(shared_ptr<ChatPrivate> msg)
   shared_ptr<ChatUser> sndr =
       chat->getChannel(msg->channelId())->getUser(msg->senderId());
   qDebug() << "Private:" << sndr->nick() << msg->text();
+  sndr->sendPrivate(msg->text());
+  connect(sndr.get(), SIGNAL(privateDelivered(shared_ptr<ChatPrivate>)),
+          this, SLOT(testChatDeliveredReport(shared_ptr<ChatPrivate>)));
+}
+
+void MainApplication::testChatDeliveredReport(shared_ptr<ChatPrivate> msg)
+{
+  Chat *chat = conn->getChatInstance();
+  shared_ptr<ChatUser> sndr =
+      chat->getChannel(msg->channelId())->getUser(msg->receiverId());
+  qDebug() << "Private to" << sndr->nick()
+           << ":" << msg->text() << "delivered" << msg->delivered();
+  disconnect(this, SLOT(testChatDeliveredReport(shared_ptr<ChatPrivate>)));
 }

@@ -62,15 +62,23 @@ public:
   {
     return _history;
   }
+  inline shared_ptr<ChatPrivate> getPrivate(QString id)
+  {
+    return _messages[id];
+  }
 
 signals:
   void newPrivate(QString text);
+  void sendPrivateReady(shared_ptr<ChatPrivate> msg);
+  void privateDelivered(shared_ptr<ChatPrivate> msg);
 
 public slots:
-//  void sendPrivate(QString text);
+  void sendPrivate(QString text);
 
 private slots:
   void recvPrivate(shared_ptr<ChatPrivate> msg);
+  void recvDeliveredReport(QString channelId,
+                           QString userId, QString messageId);
 
 private:
   void connectAll();
@@ -79,6 +87,7 @@ private:
   Connector *_conn;
   QString _channel_id, _id, _nick, _ip, _computer_name;
   QMap<QDateTime, shared_ptr<ChatPrivate> > _history;
+  QMap<QString, shared_ptr<ChatPrivate> > _messages;
 };
 
 #endif // CHAT_USER_H

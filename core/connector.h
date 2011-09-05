@@ -67,6 +67,7 @@ public slots:
 
   // === Chat            === //
   virtual void chatUpdateUsers() = 0;
+  virtual void chatSendPrivate(shared_ptr<ChatPrivate> msg) = 0;
 
 private slots:
   // === Chat            === //
@@ -91,6 +92,7 @@ signals:
   void chatUserEnter(QString channelId, shared_ptr<ChatUser> user);
   void chatUserLeave(QString channelId, QString userId);
   void chatPrivateMessage(shared_ptr<ChatPrivate> message);
+  void chatPrivateDelivered(QString channelId, QString userId, QString messageId);
 
   // === Common           === //
   void nickIsSet();

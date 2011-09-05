@@ -49,6 +49,7 @@ public slots:
 
   // === Chat               === //
   void chatUpdateUsers();
+  void chatSendPrivate(shared_ptr<ChatPrivate> msg);
 
 private slots:
   // === Common             === //
