@@ -25,7 +25,8 @@
 
 class Connector;
 
-class BoardChannel : public QObject
+class BoardChannel
+    : public QObject
 {
   Q_OBJECT
 public:
@@ -43,6 +44,9 @@ public:
   {
     return _description;
   }
+
+signals:
+  void addMessageReady(int channelId, QString text, int actualityDays);
 
 public slots:
   void addMessage(QString text, int actualityDays = 30);

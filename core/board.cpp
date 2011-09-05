@@ -24,73 +24,91 @@
 #include "board_message.h"
 
 Board::Board(Connector *conn)
-  : QObject(conn), parent(conn)
+  : QObject(conn), _conn(conn)
 {
+  connectAll();
+}
+
+void Board::connectAll()
+{
+  connect(_conn, SIGNAL(boardChannelsRecv(QMap<int, shared_ptr<BoardChannel> >)),
+          this, SLOT(updateChannels(QMap<int,shared_ptr<BoardChannel> >)));
+  connect(_conn, SIGNAL(boardMessagesRecv(QMap<int,shared_ptr<BoardMessage> >)),
+          this, SLOT(updateMessages(QMap<int,shared_ptr<BoardMessage> >)));
+
+  connect(this, SIGNAL(addMessageReady(int,QString)),
+          _conn, SLOT(boardAddMessage(int,QString,int)));
+  connect(this, SIGNAL(addReplyReady(int,QString)),
+          _conn, SLOT(boardAddReply(int,QString)));
+  connect(this, SIGNAL(editMessageReady(int,QString)),
+          _conn, SLOT(boardEditMessage(int,QString,int)));
+  connect(this, SIGNAL(deleteMessageReady(int)),
+          _conn, SLOT(boardDeleteMessage(int)));
+  connect(this, SIGNAL(upMessageReady(int)),
+          _conn, SLOT(boardUpMessage(int)));
 }
 
 void Board::updateChannels(QMap<int, shared_ptr<BoardChannel> > channels)
 {
-    _channels = channels;
-    rebuildMessagesTree();
-    emit channelsUpdated();
+  _channels = channels;
+  rebuildMessagesTree();
+  emit channelsUpdated();
 }
 
 void Board::updateMessages(QMap<int, shared_ptr<BoardMessage> > messages)
 {
-    if (!_messages.isEmpty())
-    {
-        QList<int> messagesId = messages.keys();
-        QList<int>::const_iterator it;
-        for (it = messagesId.constBegin();
-             it != messagesId.constEnd(); ++it)
-            _messages.insert(*it, messages[*it]);
-    }
-    else
-        _messages = messages;
-    rebuildMessagesTree();
-    emit messagesUpdated();
+  if (!_messages.isEmpty())
+  {
+    QList<int> messagesId = messages.keys();
+    QList<int>::const_iterator it;
+    for (it = messagesId.constBegin(); it != messagesId.constEnd(); ++it)
+      _messages.insert(*it, messages[*it]);
+  }
+  else
+    _messages = messages;
+  rebuildMessagesTree();
+  emit messagesUpdated();
 }
 
 void Board::rebuildMessagesTree()
 {
-    if (!_messages.isEmpty())
+  if (!_messages.isEmpty())
+  {
+    QList<shared_ptr<BoardMessage> > msg = _messages.values();
+    QList<shared_ptr<BoardMessage> >::const_iterator it;
+    for (it = msg.constBegin(); it != msg.constEnd(); ++it)
     {
-        QList<shared_ptr<BoardMessage> > msg = _messages.values();
-        QList<shared_ptr<BoardMessage> >::const_iterator it;
-        for (it = msg.constBegin();
-             it != msg.constEnd(); ++it)
-        {
-            if ((*it)->parentId() == -1)
-                (*it)->setParent(getChannel((*it)->channelId()).get());
-            else
-                (*it)->setParent(getMessage((*it)->parentId()).get());
-        }
+      if ((*it)->parentId() == -1)
+        (*it)->setParent(getChannel((*it)->channelId()).get());
+      else
+        (*it)->setParent(getMessage((*it)->parentId()).get());
     }
+  }
 }
 
 void Board::addMessage(int channelId,
                        QString text, int actualityDays)
 {
-    parent->boardAddMessage(channelId, text, actualityDays);
+  emit addMessageReady(channelId, text, actualityDays);
 }
 
 void Board::addReply(int messageId, QString text)
 {
-    parent->boardAddReply(messageId, text);
+  emit addReplyReady(messageId, text);
 }
 
 void Board::editMessage(int messageId,
                         QString text, int actualityDays)
 {
-    parent->boardEditMessage(messageId, text, actualityDays);
+  emit editMessageReady(messageId, text, actualityDays);
 }
 
 void Board::deleteMessage(int messageId)
 {
-    parent->boardDeleteMessage(messageId);
+  emit deleteMessageReady(messageId);
 }
 
 void Board::upMessage(int messageId)
 {
-    parent->boardUpMessage(messageId);
+  emit upMessageReady(messageId);
 }

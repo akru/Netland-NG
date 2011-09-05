@@ -23,13 +23,20 @@
 #include "chat_user.h"
 #include "chat_private.h"
 
-Chat::Chat(QObject *parent) :
-    QObject(parent)
+Chat::Chat(Connector *conn)
+  : QObject(conn), _conn(conn)
 {
+  connectAll();
+}
+
+void Chat::connectAll()
+{
+  connect(_conn, SIGNAL(chatChannelsRecv(QMap<QString,shared_ptr<ChatChannel> >)),
+          this, SLOT(updateChannels(QMap<QString,shared_ptr<ChatChannel> >)));
 }
 
 void Chat::updateChannels(QMap<QString, shared_ptr<ChatChannel> > channels)
 {
-    _channels = channels;
-    emit channelsUpdated();
+  _channels = channels;
+  emit channelsUpdated();
 }

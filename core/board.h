@@ -51,29 +51,33 @@ public:
   }
 
 signals:
-    void channelsUpdated();
-    void messagesUpdated();
+  void channelsUpdated();
+  void messagesUpdated();
+  void addMessageReady(int channelId, QString text, int actualityDays);
+  void addReplyReady(int messageId, QString text);
+  void editMessageReady(int messageId, QString text, int actualityDays);
+  void deleteMessageReady(int messageId);
+  void upMessageReady(int messageId);
 
 public slots:
-    void addMessage(int channelId,
-                    QString text, int actualityDays = 30);
-    void addReply(int messageId, QString text);
-    void editMessage(int messageId,
-                     QString text, int actualityDays = 30);
-    void deleteMessage(int messageId);
-    void upMessage(int messageId);
+  void addMessage(int channelId, QString text, int actualityDays = 30);
+  void addReply(int messageId, QString text);
+  void editMessage(int messageId, QString text, int actualityDays = 30);
+  void deleteMessage(int messageId);
+  void upMessage(int messageId);
 
 private slots:
-    void updateChannels(QMap<int, shared_ptr<BoardChannel> > channels);
-    void updateMessages(QMap<int, shared_ptr<BoardMessage> > messages);
+  void updateChannels(QMap<int, shared_ptr<BoardChannel> > channels);
+  void updateMessages(QMap<int, shared_ptr<BoardMessage> > messages);
 
 private:
-    void rebuildMessagesTree();
+  void connectAll();
+  void rebuildMessagesTree();
 
 private:
-    Connector *parent;
-    QMap<int, shared_ptr<BoardChannel> > _channels;
-    QMap<int, shared_ptr<BoardMessage> > _messages;
+  Connector *_conn;
+  QMap<int, shared_ptr<BoardChannel> > _channels;
+  QMap<int, shared_ptr<BoardMessage> > _messages;
 };
 
 #endif // BOARD_H

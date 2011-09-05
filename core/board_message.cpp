@@ -35,20 +35,20 @@ BoardMessage::BoardMessage(Connector *conn,
 
 void BoardMessage::addReply(QString text)
 {
-  _conn->boardAddReply(_id, text);
+  emit addReplyReady(_id, text);
 }
 
 void BoardMessage::editMessage(QString text, int actualityDays)
 {
-  _conn->boardEditMessage(_id, text, actualityDays);
+  emit editMessageReady(_id, text, actualityDays);
 }
 
 void BoardMessage::deleteMessage()
 {
-  _conn->boardDeleteMessage(_id);
+  emit deleteMessageReady(_id);
 }
 
 void BoardMessage::upMessage()
 {
-  _conn->boardUpMessage(_id);
+  emit deleteMessageReady(_id);
 }

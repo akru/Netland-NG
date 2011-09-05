@@ -29,5 +29,5 @@ BoardChannel::BoardChannel(Connector *conn,
 
 void BoardChannel::addMessage(QString text, int actualityDays)
 {
-  _conn->boardAddMessage(_id, text, actualityDays);
+  emit addMessageReady(_id, text, actualityDays);
 }

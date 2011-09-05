@@ -30,30 +30,35 @@ using namespace boost;
 class ChatChannel;
 class ChatUser;
 class ChatPrivate;
+class Connector;
 
-class Chat : public QObject
+class Chat
+    : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit Chat(QObject *parent = 0);
-    inline QList<shared_ptr<ChatChannel> > channels()
-    {
-        return _channels.values();
-    }
-    inline shared_ptr<ChatChannel> getChannel(QString id)
-    {
-        return _channels[id];
-    }
+  explicit Chat(Connector *conn);
+  inline QList<shared_ptr<ChatChannel> > channels()
+  {
+    return _channels.values();
+  }
+  inline shared_ptr<ChatChannel> getChannel(QString id)
+  {
+    return _channels[id];
+  }
 
 signals:
-    void channelsUpdated();
-public slots:
+  void channelsUpdated();
 
 private slots:
-    void updateChannels(QMap<QString, shared_ptr<ChatChannel> > channels);
+  void updateChannels(QMap<QString, shared_ptr<ChatChannel> > channels);
 
 private:
-    QMap<QString, shared_ptr<ChatChannel> > _channels;
+  void connectAll();
+
+private:
+  Connector *_conn;
+  QMap<QString, shared_ptr<ChatChannel> > _channels;
 };
 
 #endif // CHAT_H

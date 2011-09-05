@@ -29,67 +29,68 @@
 #include <chat_private.h>
 
 MainApplication::MainApplication(int argc, char *argv[])
-    : QCoreApplication(argc, argv),
-      conn(new ConnectorOld)
+  : QCoreApplication(argc, argv),
+    conn(new ConnectorOld)
 {
-    connectAll();
-    conn->connectToServer("192.168.111.210", "1539");
+  connectAll();
+  conn->connectToServer("192.168.111.210", "1539");
 }
 
 MainApplication::~MainApplication()
 {
-    delete conn;
+  delete conn;
 }
 
 void MainApplication::connectAll()
 {
-    connect(conn, SIGNAL(authSuccess()),
-            this, SLOT(testAuthentification()));
-    connect(conn->getBoardInstance(), SIGNAL(channelsUpdated()),
-            this, SLOT(testBoardViewChannels()));
-    connect(conn->getBoardInstance(), SIGNAL(messagesUpdated()),
-            this, SLOT(testBoardViewMessages()));
-    connect(conn->getChatInstance(), SIGNAL(channelsUpdated()),
-            this, SLOT(testChatViewChannels()));
-    connect(conn, SIGNAL(chatPrivateMessage(shared_ptr<ChatPrivate>)),
-            this, SLOT(testChatPrivateMessage(shared_ptr<ChatPrivate>)));
+  connect(conn, SIGNAL(authSuccess()),
+          this, SLOT(testAuthentification()));
+  connect(conn->getBoardInstance(), SIGNAL(channelsUpdated()),
+          this, SLOT(testBoardViewChannels()));
+  connect(conn->getBoardInstance(), SIGNAL(messagesUpdated()),
+          this, SLOT(testBoardViewMessages()));
+  connect(conn->getChatInstance(), SIGNAL(channelsUpdated()),
+          this, SLOT(testChatViewChannels()));
+  connect(conn, SIGNAL(chatPrivateMessage(shared_ptr<ChatPrivate>)),
+          this, SLOT(testChatPrivateMessage(shared_ptr<ChatPrivate>)));
 }
 
 // Tests
 
 void MainApplication::testAuthentification()
 {
-    qDebug() << "Authentification success!";
-    conn->setNick("inspier");
+  qDebug() << "Authentification success!";
+  conn->setNick("inspier");
 }
 
 void MainApplication::testBoardViewChannels()
 {
-    qDebug() << "View board channels:";
-    QList<shared_ptr<BoardChannel> > channels = conn->getBoardInstance()->channels();
-    QList<shared_ptr<BoardChannel> >::const_iterator it;
-    for (it = channels.constBegin();
-         it != channels.constEnd(); ++it)
-    {
-        qDebug() << "--> " << (*it)->name() << " :: " << (*it)->description();
-    }
+  qDebug() << "View board channels:";
+  QList<shared_ptr<BoardChannel> > channels = conn->getBoardInstance()->channels();
+  QList<shared_ptr<BoardChannel> >::const_iterator it;
+  for (it = channels.constBegin(); it != channels.constEnd(); ++it)
+  {
+    qDebug() << "--> " << (*it)->name() << " :: " << (*it)->description();
+  }
 }
 
 void MainApplication::testBoardViewMessages()
 {
-    qDebug() << "View board messages:";
-    shared_ptr<BoardChannel> ch = conn->getBoardInstance()->channels().at(0);
-    qDebug() << ch->name() << ":";
+  qDebug() << "View board messages:";
+  shared_ptr<BoardChannel> ch = conn->getBoardInstance()->channels().at(0);
+  qDebug() << ch->name() << ":";
 
-    QObjectList messages = ch->children();
-    QObjectList::const_iterator it;
-    for (it = messages.constBegin(); it != messages.constEnd(); ++it)
-    {
-        qDebug() << ((BoardMessage *) *it)->nick() << "@" <<  ((BoardMessage *) *it)->hostname()
-                 << " ::  " << ((BoardMessage *) *it)->body() <<
-                    ((BoardMessage *) *it)->editTime() << "\n + [" <<
-                    ((BoardMessage *) *it)->children().count() << "]\n\n";
-    }
+  QObjectList messages = ch->children();
+  QObjectList::const_iterator it;
+  for (it = messages.constBegin(); it != messages.constEnd(); ++it)
+  {
+    qDebug() << ((BoardMessage *) *it)->nick()
+             << "@"
+             <<  ((BoardMessage *) *it)->hostname()
+             << ":\n" << ((BoardMessage *) *it)->body().left(15) << "..."
+             << ((BoardMessage *) *it)->editTime() << "\n + ["
+             << ((BoardMessage *) *it)->children().count() << "]\n\n";
+  }
 }
 
 void MainApplication::testChatViewChannels()
@@ -126,12 +127,12 @@ void MainApplication::testChatViewChannelUsers()
 
 void MainApplication::testChatViewConnected(shared_ptr<ChatUser> user)
 {
-    qDebug() << "Chat:" << user->nick() << "connected";
+  qDebug() << "Chat:" << user->nick() << "connected";
 }
 
 void MainApplication::testChatViewDisconnected(shared_ptr<ChatUser> user)
 {
-    qDebug() << "Chat:" << user->nick() << "disconnected";
+  qDebug() << "Chat:" << user->nick() << "disconnected";
 }
 
 void MainApplication::testChatPrivateMessage(shared_ptr<ChatPrivate> msg)

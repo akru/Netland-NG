@@ -30,30 +30,31 @@ class Connector;
 class ChatUser;
 class ChatPrivate;
 
-class MainApplication : public QCoreApplication
+class MainApplication
+    : public QCoreApplication
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    MainApplication(int argc, char *argv[]);
-    ~MainApplication();
+  MainApplication(int argc, char *argv[]);
+  ~MainApplication();
 
 private:
-    void connectAll();
+  void connectAll();
 
 public slots:
-    void testAuthentification();
+  void testAuthentification();
 
-    void testBoardViewChannels();
-    void testBoardViewMessages();
-    void testChatViewChannels();
-    void testChatViewChannelUsers();
-    void testChatViewConnected(shared_ptr<ChatUser> user);
-    void testChatViewDisconnected(shared_ptr<ChatUser> user);
-    void testChatPrivateMessage(shared_ptr<ChatPrivate> msg);
+  void testBoardViewChannels();
+  void testBoardViewMessages();
+  void testChatViewChannels();
+  void testChatViewChannelUsers();
+  void testChatViewConnected(shared_ptr<ChatUser> user);
+  void testChatViewDisconnected(shared_ptr<ChatUser> user);
+  void testChatPrivateMessage(shared_ptr<ChatPrivate> msg);
 
 private:
-    Connector *conn;
-    QString server;
+  Connector *conn;
+  QString server;
 };
 
 #endif // MAIN_APPLICATION_H
