@@ -25,6 +25,13 @@ BoardChannel::BoardChannel(Connector *conn,
                            int id, QString name, QString description)
   : _conn(conn), _id(id), _name(name), _description(description)
 {
+  connectAll();
+}
+
+void BoardChannel::connectAll()
+{
+  connect(this, SIGNAL(addMessageReady(int,QString,int)),
+          _conn, SLOT(boardAddMessage(int,QString,int)));
 }
 
 void BoardChannel::addMessage(QString text, int actualityDays)

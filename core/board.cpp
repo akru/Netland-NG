@@ -36,11 +36,11 @@ void Board::connectAll()
   connect(_conn, SIGNAL(boardMessagesRecv(QMap<int,shared_ptr<BoardMessage> >)),
           this, SLOT(updateMessages(QMap<int,shared_ptr<BoardMessage> >)));
 
-  connect(this, SIGNAL(addMessageReady(int,QString)),
+  connect(this, SIGNAL(addMessageReady(int,QString, int)),
           _conn, SLOT(boardAddMessage(int,QString,int)));
   connect(this, SIGNAL(addReplyReady(int,QString)),
           _conn, SLOT(boardAddReply(int,QString)));
-  connect(this, SIGNAL(editMessageReady(int,QString)),
+  connect(this, SIGNAL(editMessageReady(int,QString,int)),
           _conn, SLOT(boardEditMessage(int,QString,int)));
   connect(this, SIGNAL(deleteMessageReady(int)),
           _conn, SLOT(boardDeleteMessage(int)));

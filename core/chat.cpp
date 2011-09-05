@@ -22,6 +22,7 @@
 #include "chat_channel.h"
 #include "chat_user.h"
 #include "chat_private.h"
+#include "connector.h"
 
 Chat::Chat(Connector *conn)
   : QObject(conn), _conn(conn)

@@ -31,6 +31,19 @@ BoardMessage::BoardMessage(Connector *conn,
       _hostname(hostname), _nick(nick), _body(body), _valid_time(valid_time),
       _post_time(post_time), _edit_time(edit_time)
 {
+  connectAll();
+}
+
+void BoardMessage::connectAll()
+{
+  connect(this, SIGNAL(addReplyReady(int,QString)),
+          _conn, SLOT(boardAddReply(int,QString)));
+  connect(this, SIGNAL(editMessageReady(int,QString,int)),
+          _conn, SLOT(boardEditMessage(int,QString,int)));
+  connect(this, SIGNAL(deleteMessageReady(int)),
+          _conn, SLOT(boardDeleteMessage(int)));
+  connect(this, SIGNAL(upMessageReady(int)),
+          _conn, SLOT(boardUpMessage(int)));
 }
 
 void BoardMessage::addReply(QString text)

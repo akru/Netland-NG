@@ -102,6 +102,9 @@ public slots:
   void upMessage();
 
 private:
+  void connectAll();
+
+private:
   Connector *_conn;
   int _id, _parent_id, _channel_id, _time_id, _deleted;
   QString _ip, _mac, _hostname, _nick, _body;

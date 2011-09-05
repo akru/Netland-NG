@@ -52,6 +52,9 @@ public slots:
   void addMessage(QString text, int actualityDays = 30);
 
 private:
+  void connectAll();
+
+private:
   Connector *_conn;
   int _id;
   QString _name, _description;
