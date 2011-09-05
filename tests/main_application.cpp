@@ -83,7 +83,8 @@ void MainApplication::testChatViewChannels()
        it != channels.constEnd(); ++it)
   {
     qDebug() << (*it)->name();
-    connect((*it).get(), SIGNAL(usersUpdated()), this, SLOT(testChatViewChannelUsers()));
+    connect((*it).get(), SIGNAL(usersUpdated()),
+            this, SLOT(testChatViewChannelUsers()));
     connect((*it).get(), SIGNAL(userConnected(shared_ptr<ChatUser>)),
             this, SLOT(testChatViewConnected(shared_ptr<ChatUser>)));
     connect((*it).get(), SIGNAL(userDisconnected(shared_ptr<ChatUser>)),

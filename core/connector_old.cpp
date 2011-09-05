@@ -125,7 +125,7 @@ void ConnectorOld::stringParser(QByteArray recv)
             {
                 qDebug() << "CONN :: Chat: new user entered" << message;
                 QString channelId = message.at(0);
-                if (getChatInstance()->getChannel(channelId))
+                if (getChatInstance()->getChannel(channelId) != NULL)
                     emit chatUserEnter(
                             channelId,
                             parseEnteredUser(message));
