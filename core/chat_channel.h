@@ -30,7 +30,7 @@ public:
     }
     inline shared_ptr<ChatUser> getUser(QString id)
     {
-        return shared_ptr<ChatUser>(_users[id]);
+        return _users[id];
     }
 
 signals:
