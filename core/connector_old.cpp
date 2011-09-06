@@ -129,7 +129,10 @@ void ConnectorOld::stringParser(QByteArray recv)
     message.pop_front();    // Remove command from message
     if (cmd == "main")
     {
-      qDebug() << "CONN :: Chat: \"main\" cmd recv";
+      qDebug() << "CONN :: Chat: channel message recv";
+      emit chatPublicMessage(message.at(0),
+                             getUserIdByName(message.at(0), message.at(2)),
+                             message.at(3));
     }
     else
     {
@@ -450,4 +453,26 @@ void ConnectorOld::chatSendPrivate(shared_ptr<ChatPrivate> msg)
       "\t" + msg->receiverId().toAscii() + "\t" +
       codec->fromUnicode(msg->text().replace("\n", "\r")) + "\n";
   write(req);
+}
+
+void ConnectorOld::chatSendPublic(QString channelId, QString text)
+{
+  QByteArray req = "cmain\t" + channelId.toAscii() +
+      "\t" + codec->fromUnicode(text) + "\n";
+  write(req);
+}
+
+QString ConnectorOld::getUserIdByName(QString channelId, QString userNick)
+{
+  QString id;
+  QList<shared_ptr<ChatUser> > users =
+      getChatInstance()->getChannel(channelId)->users();
+  QList<shared_ptr<ChatUser> >::const_iterator it;
+  for (it = users.constBegin(); it != users.constEnd(); ++it)
+    if ((*it)->nick() == userNick)
+    {
+      id = (*it)->id();
+      break;
+    }
+  return id;
 }

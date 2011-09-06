@@ -58,15 +58,22 @@ signals:
   void usersUpdated();
   void userConnected(shared_ptr<ChatUser> user);
   void userDisconnected(shared_ptr<ChatUser> user);
+  void publicMessage(shared_ptr<ChatUser> user, QString text);
 
-private:
-  void connectAll();
+  void sendPublicReady(QString channelId, QString text);
+
+public slots:
+  void sendPublic(QString text);
 
 private slots:
   void updateUsers(QString channelId,
                    QMap<QString, shared_ptr<ChatUser> > users);
   void insertUser(QString channelId, shared_ptr<ChatUser> user);
   void removeUser(QString channelId, QString userId);
+  void publicMessageRecv(QString channelId, QString userId, QString text);
+
+private:
+  void connectAll();
 
 private:
   Connector *_conn;

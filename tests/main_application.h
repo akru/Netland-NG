@@ -51,6 +51,7 @@ public slots:
   void testChatViewDisconnected(shared_ptr<ChatUser> user);
   void testChatPrivateMessage(shared_ptr<ChatPrivate> msg);
   void testChatDeliveredReport(shared_ptr<ChatPrivate> msg);
+  void testChatPublicMessage(shared_ptr<ChatUser> user, QString text);
 
 private:
   Connector *conn;

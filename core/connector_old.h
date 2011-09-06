@@ -50,6 +50,7 @@ public slots:
   // === Chat               === //
   void chatUpdateUsers();
   void chatSendPrivate(shared_ptr<ChatPrivate> msg);
+  void chatSendPublic(QString channelId, QString text);
 
 private slots:
   // === Common             === //
@@ -82,6 +83,7 @@ private:
   parseChatPrivate(QStringList recvMessage);
 
   int actualityDaysConvert(int actualityDays);
+  QString getUserIdByName(QString channelId, QString userNick);
 
 private:
   QTextCodec *codec;

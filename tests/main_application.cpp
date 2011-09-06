@@ -109,6 +109,8 @@ void MainApplication::testChatViewChannels()
             this, SLOT(testChatViewConnected(shared_ptr<ChatUser>)));
     connect((*it).get(), SIGNAL(userDisconnected(shared_ptr<ChatUser>)),
             this, SLOT(testChatViewDisconnected(shared_ptr<ChatUser>)));
+    connect((*it).get(), SIGNAL(publicMessage(shared_ptr<ChatUser>,QString)),
+            this, SLOT(testChatPublicMessage(shared_ptr<ChatUser>,QString)));
   }
 }
 
@@ -127,7 +129,7 @@ void MainApplication::testChatViewChannelUsers()
 
 void MainApplication::testChatViewConnected(shared_ptr<ChatUser> user)
 {
-  qDebug() << "Chat:" << user->nick() << "connected";
+  qDebug() << "Chat:" << user->nick()<< "connected";
 }
 
 void MainApplication::testChatViewDisconnected(shared_ptr<ChatUser> user)
@@ -154,4 +156,12 @@ void MainApplication::testChatDeliveredReport(shared_ptr<ChatPrivate> msg)
   qDebug() << "Private to" << sndr->nick()
            << ":" << msg->text() << "delivered" << msg->delivered();
   disconnect(this, SLOT(testChatDeliveredReport(shared_ptr<ChatPrivate>)));
+}
+
+void MainApplication::testChatPublicMessage(shared_ptr<ChatUser> user, QString text)
+{
+  qDebug() << "Chat: [" << user->channelId() << "]:" << text;
+  if (text == ";")
+    conn->getChatInstance()->getChannel(
+          user->channelId())->sendPublic(",");
 }

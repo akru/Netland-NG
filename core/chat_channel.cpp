@@ -37,6 +37,10 @@ void ChatChannel::connectAll()
           this, SLOT(insertUser(QString,shared_ptr<ChatUser>)));
   connect(_conn, SIGNAL(chatUserLeave(QString,QString)),
           this, SLOT(removeUser(QString,QString)));
+  connect(this, SIGNAL(sendPublicReady(QString,QString)),
+          _conn, SLOT(chatSendPublic(QString,QString)));
+  connect(_conn, SIGNAL(chatPublicMessage(QString,QString,QString)),
+          this, SLOT(publicMessageRecv(QString,QString,QString)));
 }
 
 shared_ptr<ChatUser>
@@ -84,3 +88,19 @@ void ChatChannel::removeUser(QString channelId, QString userId)
   }
 }
 
+void ChatChannel::sendPublic(QString text)
+{
+  emit sendPublicReady(_id, text);
+}
+
+void ChatChannel::publicMessageRecv(QString channelId,
+                                    QString userId, QString text)
+{
+  if (_id == channelId)
+  {
+    bool online;
+    shared_ptr<ChatUser> user = getUser(userId, &online);
+    if (online)
+      emit publicMessage(user, text);
+  }
+}

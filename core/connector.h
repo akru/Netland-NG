@@ -50,29 +50,6 @@ public:
     return _chat;
   }
 
-public slots:
-  // === Common          === //
-  void setNick(QString nick);
-  void connectToServer(QString address, QString port);
-
-  // === Board           === //
-  virtual void boardUpdateMessages() = 0;
-  virtual void boardAddMessage(int channelId,
-                               QString text, int actualityDays) = 0;
-  virtual void boardAddReply(int messageId, QString text) = 0;
-  virtual void boardEditMessage(int messageId,
-                                QString text, int actualityDays) = 0;
-  virtual void boardDeleteMessage(int messageId) = 0;
-  virtual void boardUpMessage(int messageId) = 0;
-
-  // === Chat            === //
-  virtual void chatUpdateUsers() = 0;
-  virtual void chatSendPrivate(shared_ptr<ChatPrivate> msg) = 0;
-
-private slots:
-  // === Chat            === //
-  virtual void chatSetNick() = 0;
-
 signals:
   // === Authentification === //
   void authSuccess();
@@ -93,9 +70,34 @@ signals:
   void chatUserLeave(QString channelId, QString userId);
   void chatPrivateMessage(shared_ptr<ChatPrivate> message);
   void chatPrivateDelivered(QString channelId, QString userId, QString messageId);
+  void chatPublicMessage(QString channelId, QString userId, QString text);
 
   // === Common           === //
   void nickIsSet();
+
+public slots:
+  // === Common          === //
+  void setNick(QString nick);
+  void connectToServer(QString address, QString port);
+
+  // === Board           === //
+  virtual void boardUpdateMessages() = 0;
+  virtual void boardAddMessage(int channelId,
+                               QString text, int actualityDays) = 0;
+  virtual void boardAddReply(int messageId, QString text) = 0;
+  virtual void boardEditMessage(int messageId,
+                                QString text, int actualityDays) = 0;
+  virtual void boardDeleteMessage(int messageId) = 0;
+  virtual void boardUpMessage(int messageId) = 0;
+
+  // === Chat            === //
+  virtual void chatUpdateUsers() = 0;
+  virtual void chatSendPrivate(shared_ptr<ChatPrivate> msg) = 0;
+  virtual void chatSendPublic(QString channelId, QString text) = 0;
+
+private slots:
+  // === Chat            === //
+  virtual void chatSetNick() = 0;
 
 protected:
   QString _nick;
